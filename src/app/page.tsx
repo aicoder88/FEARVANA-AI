@@ -77,16 +77,16 @@ export default function FearvanaHomePage() {
 
   return (
     <MainLayout>
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 dark:to-primary/10">
+      <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/20 dark:from-background dark:via-primary/10 dark:to-accent/30">
         {/* Header */}
         <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-gradient-to-br from-primary via-accent to-primary rounded-xl flex items-center justify-center shadow-lg glow-effect">
                   <Target className="w-4 h-4 text-white" />
                 </div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
                   Fearvana AI
                 </h1>
               </div>
@@ -141,7 +141,7 @@ export default function FearvanaHomePage() {
               <p className="text-lg text-muted-foreground mb-4">
                 Find Your Sacred Edge. Live it. Track it. Automate growth.
               </p>
-              <div className="bg-gradient-to-r from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 rounded-lg p-4 border border-primary/20 dark:border-primary/30">
+              <div className="bg-gradient-to-r from-primary/10 via-accent/10 to-primary/5 dark:from-primary/20 dark:via-accent/20 dark:to-primary/10 rounded-xl p-6 border border-primary/20 dark:border-primary/30 shadow-lg backdrop-blur-sm">
                 <p className="text-sm italic font-medium text-primary dark:text-primary">
                   &quot;{dailyQuote}&quot;
                 </p>
@@ -152,7 +152,7 @@ export default function FearvanaHomePage() {
             </div>
 
             {/* Sacred Edge Status */}
-            <Card className="mb-8 border-2 border-primary/20 dark:border-primary/30 bg-gradient-to-r from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20">
+            <Card className="mb-8 border-2 border-primary/20 dark:border-primary/30 bg-gradient-to-br from-primary/5 via-accent/5 to-primary/10 dark:from-primary/10 dark:via-accent/10 dark:to-primary/20 shadow-xl backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-primary dark:text-primary">
                   <Target className="w-5 h-5" />
@@ -188,13 +188,13 @@ export default function FearvanaHomePage() {
                 </div>
                 <div className="flex gap-2 justify-center">
                   <Link href="/sacred-edge">
-                    <Button className="bg-primary hover:bg-primary/90">
+                    <Button className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-lg hover:shadow-xl transition-all duration-300">
                       <Target className="w-4 h-4 mr-2" />
                       Find Your Edge
                     </Button>
                   </Link>
                   <Link href="/chat">
-                    <Button variant="outline">
+                    <Button variant="outline" className="border-primary/30 hover:bg-primary/10 hover:border-primary/50 transition-all duration-300">
                       <MessageSquare className="w-4 h-4 mr-2" />
                       Ask AI Akshay
                     </Button>
@@ -206,14 +206,14 @@ export default function FearvanaHomePage() {
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <Link href="/tasks">
-                <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                <Card className="hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-200 dark:border-blue-800">
                   <CardContent className="p-6 text-center">
-                    <Calendar className="w-8 h-8 mx-auto mb-3 text-blue-600" />
-                    <h3 className="font-semibold mb-2">Today&apos;s Mission</h3>
-                    <p className="text-sm text-muted-foreground">
+                    <Calendar className="w-8 h-8 mx-auto mb-3 text-blue-600 dark:text-blue-400" />
+                    <h3 className="font-semibold mb-2 text-blue-900 dark:text-blue-100">Today&apos;s Mission</h3>
+                    <p className="text-sm text-blue-700 dark:text-blue-300">
                       AI-generated daily action plan
                     </p>
-                    <div className="mt-3 text-xs text-blue-600 font-medium">
+                    <div className="mt-3 text-xs text-blue-600 dark:text-blue-400 font-medium">
                       3 tasks pending
                     </div>
                   </CardContent>
@@ -221,14 +221,14 @@ export default function FearvanaHomePage() {
               </Link>
 
               <Link href="/levels">
-                <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                <Card className="hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950 dark:to-emerald-900 border-emerald-200 dark:border-emerald-800">
                   <CardContent className="p-6 text-center">
-                    <BarChart3 className="w-8 h-8 mx-auto mb-3 text-green-600" />
-                    <h3 className="font-semibold mb-2">Life Levels</h3>
-                    <p className="text-sm text-muted-foreground">
+                    <BarChart3 className="w-8 h-8 mx-auto mb-3 text-emerald-600 dark:text-emerald-400" />
+                    <h3 className="font-semibold mb-2 text-emerald-900 dark:text-emerald-100">Life Levels</h3>
+                    <p className="text-sm text-emerald-700 dark:text-emerald-300">
                       Track your 8 life areas
                     </p>
-                    <div className="mt-3 text-xs text-green-600 font-medium">
+                    <div className="mt-3 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
                       {overallScore}% overall
                     </div>
                   </CardContent>
@@ -236,14 +236,14 @@ export default function FearvanaHomePage() {
               </Link>
 
               <Link href="/insights">
-                <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                <Card className="hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900 border-purple-200 dark:border-purple-800">
                   <CardContent className="p-6 text-center">
-                    <Zap className="w-8 h-8 mx-auto mb-3 text-purple-600" />
-                    <h3 className="font-semibold mb-2">Insights</h3>
-                    <p className="text-sm text-muted-foreground">
+                    <Zap className="w-8 h-8 mx-auto mb-3 text-purple-600 dark:text-purple-400" />
+                    <h3 className="font-semibold mb-2 text-purple-900 dark:text-purple-100">Insights</h3>
+                    <p className="text-sm text-purple-700 dark:text-purple-300">
                       Analytics & journaling
                     </p>
-                    <div className="mt-3 text-xs text-purple-600 font-medium">
+                    <div className="mt-3 text-xs text-purple-600 dark:text-purple-400 font-medium">
                       2 new insights
                     </div>
                   </CardContent>
@@ -252,16 +252,16 @@ export default function FearvanaHomePage() {
             </div>
 
             {/* Life Areas Overview */}
-            <Card>
+            <Card className="bg-gradient-to-br from-card via-card to-accent/5 dark:to-accent/10 shadow-xl backdrop-blur-sm">
               <CardHeader>
-                <CardTitle>Life Areas Overview</CardTitle>
+                <CardTitle className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Life Areas Overview</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {lifeAreas.map((area) => (
                     <Link key={area.key} href={`/levels/${area.key}`}>
-                      <div className="p-4 rounded-lg border hover:shadow-md transition-shadow cursor-pointer">
-                        <div className="flex items-center gap-3 mb-2">
+                      <div className="p-4 rounded-xl border hover:shadow-lg hover:scale-105 transition-all duration-300 cursor-pointer bg-gradient-to-br from-background to-accent/10 dark:to-accent/20">
+                        <div className="flex items-center gap-3 mb-3">
                           <span className="text-2xl">{area.icon}</span>
                           <div>
                             <div className="font-medium text-sm">
@@ -272,9 +272,9 @@ export default function FearvanaHomePage() {
                             </div>
                           </div>
                         </div>
-                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div className="w-full bg-muted rounded-full h-2.5">
                           <div
-                            className="bg-gradient-to-r from-primary to-primary/80 h-2 rounded-full transition-all duration-300"
+                            className="bg-gradient-to-r from-primary via-accent to-primary h-2.5 rounded-full transition-all duration-500 shadow-sm"
                             style={{ width: `${area.score}%` }}
                           />
                         </div>
@@ -284,7 +284,7 @@ export default function FearvanaHomePage() {
                 </div>
                 <div className="mt-6 text-center">
                   <Link href="/levels">
-                    <Button variant="outline">
+                    <Button variant="outline" className="border-primary/30 hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10 hover:border-primary/50 transition-all duration-300">
                       View Detailed Analytics
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
