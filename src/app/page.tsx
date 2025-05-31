@@ -1,0 +1,300 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { MainLayout } from "@/components/layout/main-layout";
+import { APISettings } from "@/components/settings/api-settings";
+import { FEARVANA_LIFE_AREAS } from "@/lib/constants";
+import {
+  Target,
+  MessageSquare,
+  Calendar,
+  BarChart3,
+  Settings,
+  X,
+  ArrowRight,
+  Zap,
+} from "lucide-react";
+import Link from "next/link";
+
+interface SacredEdgeStatus {
+  currentFocus: string;
+  progressScore: number;
+  lastAction: string;
+  nextChallenge: string;
+}
+
+const DAILY_QUOTES = [
+  "Your Sacred Edge is where fear and excitement meet. That's where growth lives.",
+  "The cave you fear to enter holds the treasure you seek.",
+  "Suffering is inevitable. Suffering in silence is optional.",
+  "Your comfort zone is a beautiful place, but nothing ever grows there.",
+  "The only way out is through. The only way through is with courage.",
+  "Fear is not your enemy. It's your compass pointing toward growth.",
+];
+
+export default function FearvanaHomePage() {
+  const [showSettings, setShowSettings] = useState(false);
+  const [sacredEdgeStatus, setSacredEdgeStatus] = useState<SacredEdgeStatus>({
+    currentFocus: "Building mental resilience",
+    progressScore: 73,
+    lastAction: "Completed fear confrontation exercise",
+    nextChallenge: "Have that difficult conversation",
+  });
+  const [dailyQuote] = useState(
+    () => DAILY_QUOTES[Math.floor(Math.random() * DAILY_QUOTES.length)],
+  );
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const getGreeting = () => {
+    const hour = currentTime.getHours();
+    if (hour < 12) return "Good morning, Warrior! 🌅";
+    if (hour < 17) return "Keep pushing, Champion! ☀️";
+    if (hour < 21) return "Evening reflection time 🌆";
+    return "Rest well, tomorrow we rise! 🌙";
+  };
+
+  const getLifeAreaSummary = () => {
+    return Object.entries(FEARVANA_LIFE_AREAS).map(([key, area]) => ({
+      key,
+      label: area.label,
+      icon: area.icon,
+      score: Math.floor(Math.random() * 30) + 70, // Mock scores 70-100
+      color: area.color,
+    }));
+  };
+
+  const lifeAreas = getLifeAreaSummary();
+  const overallScore = Math.round(
+    lifeAreas.reduce((sum, area) => sum + area.score, 0) / lifeAreas.length,
+  );
+
+  return (
+    <MainLayout>
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 dark:to-primary/10">
+        {/* Header */}
+        <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center">
+                  <Target className="w-4 h-4 text-white" />
+                </div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                  Fearvana AI
+                </h1>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="text-sm text-muted-foreground">
+                  {currentTime.toLocaleTimeString("en-US", {
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: true,
+                  })}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowSettings(!showSettings)}
+                >
+                  <Settings className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Settings Panel */}
+        {showSettings && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div className="bg-background rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between p-6 border-b">
+                <h2 className="text-xl font-semibold">Settings</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowSettings(false)}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="p-6">
+                <APISettings />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Main Content */}
+        <main className="container mx-auto px-4 py-8">
+          <div className="max-w-6xl mx-auto">
+            {/* Welcome Section */}
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold mb-2">{getGreeting()}</h2>
+              <p className="text-lg text-muted-foreground mb-4">
+                Find Your Sacred Edge. Live it. Track it. Automate growth.
+              </p>
+              <div className="bg-gradient-to-r from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 rounded-lg p-4 border border-primary/20 dark:border-primary/30">
+                <p className="text-sm italic font-medium text-primary dark:text-primary">
+                  &quot;{dailyQuote}&quot;
+                </p>
+                <p className="text-xs text-primary/80 dark:text-primary/70 mt-1">
+                  - Akshay Nanavati
+                </p>
+              </div>
+            </div>
+
+            {/* Sacred Edge Status */}
+            <Card className="mb-8 border-2 border-primary/20 dark:border-primary/30 bg-gradient-to-r from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-primary dark:text-primary">
+                  <Target className="w-5 h-5" />
+                  Your Sacred Edge Status
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-primary">
+                      {sacredEdgeStatus.progressScore}%
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Edge Progress
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-semibold">
+                      {sacredEdgeStatus.currentFocus}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Current Focus
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-sm font-medium">
+                      {sacredEdgeStatus.nextChallenge}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Next Challenge
+                    </div>
+                  </div>
+                </div>
+                <div className="flex gap-2 justify-center">
+                  <Link href="/sacred-edge">
+                    <Button className="bg-primary hover:bg-primary/90">
+                      <Target className="w-4 h-4 mr-2" />
+                      Find Your Edge
+                    </Button>
+                  </Link>
+                  <Link href="/chat">
+                    <Button variant="outline">
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                      Ask AI Akshay
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <Link href="/tasks">
+                <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                  <CardContent className="p-6 text-center">
+                    <Calendar className="w-8 h-8 mx-auto mb-3 text-blue-600" />
+                    <h3 className="font-semibold mb-2">Today&apos;s Mission</h3>
+                    <p className="text-sm text-muted-foreground">
+                      AI-generated daily action plan
+                    </p>
+                    <div className="mt-3 text-xs text-blue-600 font-medium">
+                      3 tasks pending
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+
+              <Link href="/levels">
+                <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                  <CardContent className="p-6 text-center">
+                    <BarChart3 className="w-8 h-8 mx-auto mb-3 text-green-600" />
+                    <h3 className="font-semibold mb-2">Life Levels</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Track your 8 life areas
+                    </p>
+                    <div className="mt-3 text-xs text-green-600 font-medium">
+                      {overallScore}% overall
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+
+              <Link href="/insights">
+                <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                  <CardContent className="p-6 text-center">
+                    <Zap className="w-8 h-8 mx-auto mb-3 text-purple-600" />
+                    <h3 className="font-semibold mb-2">Insights</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Analytics & journaling
+                    </p>
+                    <div className="mt-3 text-xs text-purple-600 font-medium">
+                      2 new insights
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            </div>
+
+            {/* Life Areas Overview */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Life Areas Overview</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {lifeAreas.map((area) => (
+                    <Link key={area.key} href={`/levels/${area.key}`}>
+                      <div className="p-4 rounded-lg border hover:shadow-md transition-shadow cursor-pointer">
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="text-2xl">{area.icon}</span>
+                          <div>
+                            <div className="font-medium text-sm">
+                              {area.label}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {area.score}/100
+                            </div>
+                          </div>
+                        </div>
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                          <div
+                            className="bg-gradient-to-r from-primary to-primary/80 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${area.score}%` }}
+                          />
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+                <div className="mt-6 text-center">
+                  <Link href="/levels">
+                    <Button variant="outline">
+                      View Detailed Analytics
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </main>
+      </div>
+    </MainLayout>
+  );
+}
