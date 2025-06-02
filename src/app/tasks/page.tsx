@@ -108,7 +108,7 @@ const CATEGORY_ICONS: Record<string, string> = {
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  sacred_edge: "border-orange-500 bg-orange-50 dark:bg-orange-950",
+  sacred_edge: "border-indigo-500 bg-indigo-50 dark:bg-indigo-950",
   mindset: "border-purple-500 bg-purple-50 dark:bg-purple-950",
   health: "border-red-500 bg-red-50 dark:bg-red-950",
   relationships: "border-pink-500 bg-pink-50 dark:bg-pink-950",
@@ -171,7 +171,7 @@ export default function TasksPage() {
 
   return (
     <MainLayout>
-      <div className="min-h-full bg-gradient-to-br from-background via-background to-orange-50/20 dark:to-orange-950/20">
+      <div className="min-h-full bg-gradient-to-br from-background via-background to-indigo-50/20 dark:to-indigo-950/20">
         {/* Header */}
         <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="container mx-auto px-4 py-6">
@@ -265,7 +265,7 @@ export default function TasksPage() {
                     task.completed ? "opacity-75" : "hover:shadow-md"
                   } ${
                     task.sacredEdgeChallenge
-                      ? "border-2 border-orange-500 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950 dark:to-red-950"
+                      ? "border-2 border-indigo-500 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950"
                       : ""
                   }`}
                 >
@@ -302,7 +302,7 @@ export default function TasksPage() {
                                     : ""
                                 } ${
                                   task.sacredEdgeChallenge
-                                    ? "text-orange-800 dark:text-orange-200"
+                                    ? "text-indigo-800 dark:text-indigo-200"
                                     : ""
                                 }`}
                               >
@@ -338,7 +338,7 @@ export default function TasksPage() {
                             </span>
                           </div>
                           {task.sacredEdgeChallenge && (
-                            <div className="flex items-center gap-1 text-orange-600">
+                            <div className="flex items-center gap-1 text-indigo-600">
                               <Zap className="w-4 h-4" />
                               <span className="font-medium">Sacred Edge</span>
                             </div>
@@ -352,14 +352,16 @@ export default function TasksPage() {
             </div>
 
             {/* Daily Wisdom */}
-            <Card className="mt-8 border-2 border-orange-200 dark:border-orange-800 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950 dark:to-red-950">
-              <CardContent className="p-6 text-center">
-                <div className="text-2xl mb-3">🎯</div>
-                <p className="text-sm italic font-medium text-orange-800 dark:text-orange-200 mb-2">
+            <Card className="mt-8 border-2 border-indigo-200 dark:border-indigo-800 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950">
+              <CardContent className="p-4">
+                <p className="text-sm italic font-medium text-indigo-800 dark:text-indigo-200 mb-2">
+                  Today's Sacred Edge Challenge
+                </p>
+                <p className="text-xs text-indigo-600 dark:text-indigo-400">
                   "The cave you fear to enter holds the treasure you seek. Every
                   task completed is a step toward your Sacred Edge."
                 </p>
-                <p className="text-xs text-orange-600 dark:text-orange-400">
+                <p className="text-xs text-indigo-600 dark:text-indigo-400">
                   - Akshay Nanavati
                 </p>
               </CardContent>

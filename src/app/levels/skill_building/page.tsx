@@ -92,7 +92,7 @@ export default function SkillBuildingPage() {
                   <div className="text-2xl font-bold text-indigo-600">{currentScore}</div>
                   <div className="text-sm text-muted-foreground">Career Score</div>
                 </div>
-                <Button>
+                <Button className="button-glow bg-gradient-primary">
                   <Plus className="w-4 h-4 mr-2" />
                   Log Progress
                 </Button>
@@ -105,23 +105,27 @@ export default function SkillBuildingPage() {
         <main className="container mx-auto px-4 py-8">
           {/* Key Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            {metrics.map((metric) => (
-              <Card key={metric.key} className="hover:shadow-md transition-shadow">
+            {metrics.map((metric, index) => (
+              <Card 
+                key={metric.key} 
+                className="card-hover-effect animate-slide-in"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                  <CardTitle className="text-sm font-medium text-muted-foreground interactive-element">
                     {metric.label}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold" style={{ color: metric.color }}>
+                  <div className="text-2xl font-bold hover-scale" style={{ color: metric.color }}>
                     {metric.value.toLocaleString()}{metric.unit}
                   </div>
-                  <div className="text-xs text-muted-foreground mt-1">
+                  <div className="text-xs text-muted-foreground mt-1 hover-feedback">
                     Target: {metric.target.toLocaleString()}{metric.unit}
                   </div>
                   <Progress 
                     value={(metric.value / metric.target) * 100} 
-                    className="h-2 mt-2"
+                    className="h-2 mt-2 progress-bar-animated"
                   />
                 </CardContent>
               </Card>
@@ -132,9 +136,9 @@ export default function SkillBuildingPage() {
             {/* Charts */}
             <div className="lg:col-span-2 space-y-6">
               {/* Weekly Career Development Trends */}
-              <Card>
+              <Card className="card-hover-effect animate-fade-in">
                 <CardHeader>
-                  <CardTitle>Weekly Development Trends</CardTitle>
+                  <CardTitle className="interactive-element">Weekly Development Trends</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="h-80">
@@ -150,9 +154,30 @@ export default function SkillBuildingPage() {
                             borderRadius: '8px'
                           }} 
                         />
-                        <Line type="monotone" dataKey="learningHours" stroke="#6366f1" strokeWidth={3} name="Learning (hrs)" />
-                        <Line type="monotone" dataKey="leadership" stroke="#8b5cf6" strokeWidth={2} name="Leadership (/10)" />
-                        <Line type="monotone" dataKey="expertise" stroke="#f59e0b" strokeWidth={2} name="Expertise (/10)" />
+                        <Line 
+                          type="monotone" 
+                          dataKey="learningHours" 
+                          stroke="#6366f1" 
+                          strokeWidth={3} 
+                          name="Learning (hrs)"
+                          className="trend-line"
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="leadership" 
+                          stroke="#8b5cf6" 
+                          strokeWidth={2} 
+                          name="Leadership (/10)"
+                          className="trend-line"
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="expertise" 
+                          stroke="#f59e0b" 
+                          strokeWidth={2} 
+                          name="Expertise (/10)"
+                          className="trend-line"
+                        />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
@@ -196,26 +221,37 @@ export default function SkillBuildingPage() {
             {/* Sidebar */}
             <div className="space-y-6">
               {/* Career Goals */}
-              <Card>
+              <Card className="card-hover-effect animate-fade-in">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Target className="w-5 h-5" />
-                    Career Goals
+                    <Target className="w-5 h-5 text-primary hover-scale" />
+                    <span className="interactive-element">Career Goals</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {goals.map((goal) => (
-                    <div key={goal.id} className="space-y-2">
+                  {goals.map((goal, index) => (
+                    <div 
+                      key={goal.id} 
+                      className="space-y-2 animate-slide-in"
+                      style={{ animationDelay: `${index * 100}ms` }}
+                    >
                       <div className="flex items-center justify-between">
-                        <span className="font-medium text-sm">{goal.title}</span>
-                        <Button variant="ghost" size="icon">
+                        <span className="font-medium text-sm interactive-element">{goal.title}</span>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className="hover-feedback click-feedback button-glow"
+                        >
                           <Edit className="w-4 h-4" />
                         </Button>
                       </div>
-                      <Progress value={goal.progress} className="h-2" />
+                      <Progress 
+                        value={goal.progress} 
+                        className="h-2 progress-bar-animated"
+                      />
                       <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>{goal.current}% complete</span>
-                        <span>{Math.round(goal.progress)}%</span>
+                        <span className="hover-feedback">{goal.current}% complete</span>
+                        <span className="hover-scale">{Math.round(goal.progress)}%</span>
                       </div>
                     </div>
                   ))}
@@ -223,28 +259,32 @@ export default function SkillBuildingPage() {
               </Card>
 
               {/* Development Habits */}
-              <Card>
+              <Card className="card-hover-effect animate-fade-in">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <BookOpen className="w-5 h-5" />
-                    Development Habits
+                    <BookOpen className="w-5 h-5 text-primary hover-scale" />
+                    <span className="interactive-element">Development Habits</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {habits.map((habit) => (
-                    <div key={habit.id} className="flex items-center justify-between">
+                  {habits.map((habit, index) => (
+                    <div 
+                      key={habit.id} 
+                      className="flex items-center justify-between animate-slide-in"
+                      style={{ animationDelay: `${index * 100}ms` }}
+                    >
                       <div className="flex items-center gap-3">
-                        <span className="text-lg">{habit.icon}</span>
+                        <span className="text-lg hover-scale">{habit.icon}</span>
                         <div>
-                          <div className="font-medium text-sm">{habit.name}</div>
-                          <div className="text-xs text-muted-foreground">
+                          <div className="font-medium text-sm interactive-element">{habit.name}</div>
+                          <div className="text-xs text-muted-foreground hover-feedback">
                             {habit.current.toLocaleString()}/{habit.target.toLocaleString()} {habit.unit}
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-bold text-sm">{habit.streak} days</div>
-                        <div className="text-xs text-muted-foreground">streak</div>
+                        <div className="font-bold text-sm hover-scale">{habit.streak} days</div>
+                        <div className="text-xs text-muted-foreground hover-feedback">streak</div>
                       </div>
                     </div>
                   ))}

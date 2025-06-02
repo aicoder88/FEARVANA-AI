@@ -300,8 +300,8 @@ export default function InsightsPage() {
                       className="p-4 rounded-lg border bg-muted/50"
                     >
                       <div className="flex items-center gap-2 mb-2">
-                        <Target className="w-4 h-4 text-purple-600" />
-                        <span className="text-xs font-medium text-purple-600 uppercase tracking-wider">
+                        <Target className="w-4 h-4 text-indigo-600" />
+                        <span className="text-xs font-medium text-indigo-600 uppercase tracking-wider">
                           {insight.category}
                         </span>
                       </div>
@@ -342,8 +342,8 @@ export default function InsightsPage() {
                             {entry.date}
                           </span>
                           <div className="flex items-center gap-1">
-                            <Target className="w-4 h-4 text-orange-600" />
-                            <span className="text-sm font-medium text-orange-600">
+                            <Target className="w-4 h-4 text-indigo-600" />
+                            <span className="text-sm font-medium text-indigo-600">
                               {entry.sacredEdgeScore}/10
                             </span>
                           </div>
@@ -372,15 +372,15 @@ export default function InsightsPage() {
             </Card>
 
             {/* Sacred Edge Reminder */}
-            <Card className="mt-8 border-2 border-orange-200 dark:border-orange-800 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950 dark:to-red-950">
+            <Card className="mt-8 border-2 border-indigo-200 dark:border-indigo-800 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950">
               <CardContent className="p-6 text-center">
                 <div className="text-2xl mb-3">🎯</div>
-                <p className="text-sm italic font-medium text-orange-800 dark:text-orange-200 mb-2">
+                <p className="text-sm italic font-medium text-indigo-800 dark:text-indigo-200 mb-2">
                   "The insights you gain from facing your fears become the
                   wisdom that guides others. Your Sacred Edge journey creates
                   ripples of courage."
                 </p>
-                <p className="text-xs text-orange-600 dark:text-orange-400">
+                <p className="text-xs text-indigo-600 dark:text-indigo-400">
                   - Akshay Nanavati
                 </p>
               </CardContent>

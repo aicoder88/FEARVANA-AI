@@ -92,7 +92,7 @@ export default function FunJoyPage() {
                   <div className="text-2xl font-bold text-yellow-600">{currentScore}</div>
                   <div className="text-sm text-muted-foreground">Peace Score</div>
                 </div>
-                <Button>
+                <Button className="button-glow bg-gradient-primary">
                   <Plus className="w-4 h-4 mr-2" />
                   Log Moment
                 </Button>
@@ -105,23 +105,27 @@ export default function FunJoyPage() {
         <main className="container mx-auto px-4 py-8">
           {/* Key Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            {metrics.map((metric) => (
-              <Card key={metric.key} className="hover:shadow-md transition-shadow">
+            {metrics.map((metric, index) => (
+              <Card 
+                key={metric.key} 
+                className="card-hover-effect animate-slide-in"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                  <CardTitle className="text-sm font-medium text-muted-foreground interactive-element">
                     {metric.label}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold" style={{ color: metric.color }}>
+                  <div className="text-2xl font-bold hover-scale" style={{ color: metric.color }}>
                     {metric.value.toLocaleString()}{metric.unit}
                   </div>
-                  <div className="text-xs text-muted-foreground mt-1">
+                  <div className="text-xs text-muted-foreground mt-1 hover-feedback">
                     Target: {metric.target.toLocaleString()}{metric.unit}
                   </div>
                   <Progress 
                     value={(metric.value / metric.target) * 100} 
-                    className="h-2 mt-2"
+                    className="h-2 mt-2 progress-bar-animated"
                   />
                 </CardContent>
               </Card>
@@ -196,26 +200,37 @@ export default function FunJoyPage() {
             {/* Sidebar */}
             <div className="space-y-6">
               {/* Peace Goals */}
-              <Card>
+              <Card className="card-hover-effect animate-fade-in">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Target className="w-5 h-5" />
-                    Peace Goals
+                    <Target className="w-5 h-5 text-primary hover-scale" />
+                    <span className="interactive-element">Peace Goals</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {goals.map((goal) => (
-                    <div key={goal.id} className="space-y-2">
+                  {goals.map((goal, index) => (
+                    <div 
+                      key={goal.id} 
+                      className="space-y-2 animate-slide-in"
+                      style={{ animationDelay: `${index * 100}ms` }}
+                    >
                       <div className="flex items-center justify-between">
-                        <span className="font-medium text-sm">{goal.title}</span>
-                        <Button variant="ghost" size="icon">
+                        <span className="font-medium text-sm interactive-element">{goal.title}</span>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className="hover-feedback click-feedback button-glow"
+                        >
                           <Edit className="w-4 h-4" />
                         </Button>
                       </div>
-                      <Progress value={goal.progress} className="h-2" />
+                      <Progress 
+                        value={goal.progress} 
+                        className="h-2 progress-bar-animated"
+                      />
                       <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>{goal.current}/{goal.target}</span>
-                        <span>{Math.round(goal.progress)}%</span>
+                        <span className="hover-feedback">{goal.current}/{goal.target}</span>
+                        <span className="hover-scale">{Math.round(goal.progress)}%</span>
                       </div>
                     </div>
                   ))}
@@ -252,33 +267,25 @@ export default function FunJoyPage() {
               </Card>
 
               {/* Peace Insights */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Zap className="w-5 h-5" />
-                    Peace Insights
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {insights.map((insight, index) => (
-                    <div key={index} className={`p-3 rounded-lg border ${
-                      insight.type === 'positive' ? 'bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800' :
-                      insight.type === 'suggestion' ? 'bg-blue-50 border-blue-200 dark:bg-blue-950 dark:border-blue-800' :
-                      'bg-muted'
-                    }`}>
-                      <div className="flex items-start gap-2">
-                        <span className="text-lg">{insight.icon}</span>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                {insights.map((insight, index) => (
+                  <Card 
+                    key={insight.title}
+                    className="card-hover-effect animate-slide-in"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <CardContent className="p-6">
+                      <div className="flex items-start gap-4">
+                        <div className="text-2xl hover-scale">{insight.icon}</div>
                         <div>
-                          <div className="font-medium text-sm">{insight.title}</div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            {insight.description}
-                          </div>
+                          <h3 className="font-semibold mb-2 interactive-element">{insight.title}</h3>
+                          <p className="text-sm text-muted-foreground">{insight.description}</p>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
           </div>
         </main>

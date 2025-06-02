@@ -79,20 +79,23 @@ export default function FearvanaHomePage() {
     <MainLayout>
       <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/20 dark:from-background dark:via-primary/10 dark:to-accent/30">
         {/* Header */}
-        <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="container mx-auto px-4 py-4">
+        <header className="border-b border-primary/20 bg-gradient-to-r from-background/95 via-primary/5 to-accent/10 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 animate-gradient">
+          <div className="container mx-auto px-4 py-3">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary via-accent to-primary rounded-xl flex items-center justify-center shadow-lg glow-effect">
-                  <Target className="w-4 h-4 text-white" />
+              <div className="flex items-center gap-3 group">
+                <div className="w-8 h-8 bg-gradient-to-br from-primary via-accent to-primary rounded-xl flex items-center justify-center shadow-xl group-hover:shadow-2xl transition-all duration-500 hover:scale-105 glow-effect-intense">
+                  <Target className="w-4 h-4 text-white animate-pulse" />
                 </div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-                  Fearvana AI
-                </h1>
+                <div className="space-y-0.5">
+                  <h1 className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent hover:scale-105 transition-transform duration-300">
+                    Fearvana AI
+                  </h1>
+                  <p className="text-xs font-medium text-foreground/70">Unleash Your Potential</p>
+                </div>
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="text-sm text-muted-foreground">
+                <div className="text-lg font-bold bg-gradient-to-r from-primary/80 to-accent/80 bg-clip-text text-transparent">
                   {currentTime.toLocaleTimeString("en-US", {
                     hour: "numeric",
                     minute: "2-digit",
@@ -102,6 +105,7 @@ export default function FearvanaHomePage() {
                 <Button
                   variant="ghost"
                   size="sm"
+                  className="hover:bg-primary/10 hover:text-primary transition-colors duration-300"
                   onClick={() => setShowSettings(!showSettings)}
                 >
                   <Settings className="w-4 h-4" />
@@ -137,51 +141,51 @@ export default function FearvanaHomePage() {
           <div className="max-w-6xl mx-auto">
             {/* Welcome Section */}
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold mb-2">{getGreeting()}</h2>
+              <h2 className="text-4xl font-bold mb-2 text-foreground">{getGreeting()}</h2>
               <p className="text-lg text-muted-foreground mb-4">
                 Find Your Sacred Edge. Live it. Track it. Automate growth.
               </p>
-              <div className="bg-gradient-to-r from-primary/10 via-accent/10 to-primary/5 dark:from-primary/20 dark:via-accent/20 dark:to-primary/10 rounded-xl p-6 border border-primary/20 dark:border-primary/30 shadow-lg backdrop-blur-sm">
-                <p className="text-sm italic font-medium text-primary dark:text-primary">
+              <div className="bg-gradient-to-r from-emerald-50/50 via-blue-50/50 to-emerald-50/50 dark:from-emerald-950/50 dark:via-blue-950/50 dark:to-emerald-950/50 rounded-xl p-6 border border-emerald-200/20 dark:border-emerald-800/20 shadow-lg backdrop-blur-sm">
+                <p className="text-sm italic font-medium text-emerald-700 dark:text-emerald-300">
                   &quot;{dailyQuote}&quot;
                 </p>
-                <p className="text-xs text-primary/80 dark:text-primary/70 mt-1">
+                <p className="text-xs text-emerald-600/80 dark:text-emerald-400/80 mt-1">
                   - Akshay Nanavati
                 </p>
               </div>
             </div>
 
             {/* Sacred Edge Status */}
-            <Card className="mb-8 border-2 border-primary/20 dark:border-primary/30 bg-gradient-to-br from-primary/5 via-accent/5 to-primary/10 dark:from-primary/10 dark:via-accent/10 dark:to-primary/20 shadow-xl backdrop-blur-sm">
+            <Card className="mb-8 border-2 border-blue-200/20 dark:border-blue-800/20 bg-gradient-to-br from-blue-50/5 via-indigo-50/5 to-blue-50/10 dark:from-blue-950/5 dark:via-indigo-950/5 dark:to-blue-950/10 shadow-xl backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-primary dark:text-primary">
+                <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
                   <Target className="w-5 h-5" />
                   Your Sacred Edge Status
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="text-center p-4 rounded-xl bg-gradient-to-br from-background to-blue-50/5 dark:to-blue-900/5 border border-blue-200/10 dark:border-blue-800/10 hover:border-blue-300/20 dark:hover:border-blue-700/20 transition-all duration-300">
+                    <div className="text-3xl font-bold text-blue-700 dark:text-blue-300 mb-2">
                       {sacredEdgeStatus.progressScore}%
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm font-medium text-blue-600/80 dark:text-blue-400/80">
                       Edge Progress
                     </div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-lg font-semibold">
+                  <div className="text-center p-4 rounded-xl bg-gradient-to-br from-background to-indigo-50/5 dark:to-indigo-900/5 border border-indigo-200/10 dark:border-indigo-800/10 hover:border-indigo-300/20 dark:hover:border-indigo-700/20 transition-all duration-300">
+                    <div className="text-xl font-semibold text-indigo-700 dark:text-indigo-300 mb-2">
                       {sacredEdgeStatus.currentFocus}
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm font-medium text-indigo-600/80 dark:text-indigo-400/80">
                       Current Focus
                     </div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-sm font-medium">
+                  <div className="text-center p-4 rounded-xl bg-gradient-to-br from-background to-blue-50/5 dark:to-blue-900/5 border border-blue-200/10 dark:border-blue-800/10 hover:border-blue-300/20 dark:hover:border-blue-700/20 transition-all duration-300">
+                    <div className="text-lg font-medium text-blue-700 dark:text-blue-300 mb-2">
                       {sacredEdgeStatus.nextChallenge}
                     </div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-sm font-medium text-blue-600/80 dark:text-blue-400/80">
                       Next Challenge
                     </div>
                   </div>
@@ -203,7 +207,12 @@ export default function FearvanaHomePage() {
               </CardContent>
             </Card>
 
-            {/* Quick Actions */}
+            {/* Quick Actions Section */}
+            <div className="mb-2">
+              <h2 className="text-2xl font-bold text-foreground mb-4">
+                Quick Actions
+              </h2>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <Link href="/tasks">
                 <Card className="hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-200 dark:border-blue-800">

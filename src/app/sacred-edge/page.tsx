@@ -137,10 +137,10 @@ export default function SacredEdgePage() {
   if (isGenerating) {
     return (
       <MainLayout>
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-orange-50/20 dark:to-orange-950/20">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-indigo-50/20 dark:to-indigo-950/20">
           <Card className="w-full max-w-md">
             <CardContent className="p-8 text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 via-purple-500 to-violet-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Target className="w-8 h-8 text-white animate-pulse" />
               </div>
               <h3 className="text-xl font-bold mb-2">
@@ -151,13 +151,13 @@ export default function SacredEdgePage() {
                 Sacred Edge.
               </p>
               <div className="flex justify-center space-x-1">
-                <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce"></div>
                 <div
-                  className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"
+                  className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
                   style={{ animationDelay: "0.1s" }}
                 ></div>
                 <div
-                  className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"
+                  className="w-2 h-2 bg-violet-500 rounded-full animate-bounce"
                   style={{ animationDelay: "0.2s" }}
                 ></div>
               </div>
@@ -171,12 +171,12 @@ export default function SacredEdgePage() {
   if (currentStep === "result" && sacredEdgeResult) {
     return (
       <MainLayout>
-        <div className="min-h-full bg-gradient-to-br from-background via-background to-orange-50/20 dark:to-orange-950/20">
+        <div className="min-h-full bg-gradient-to-br from-background via-background to-indigo-50/20 dark:to-indigo-950/20">
           <div className="container mx-auto px-4 py-8">
             <div className="max-w-4xl mx-auto">
               {/* Header */}
               <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 via-purple-500 to-violet-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <CheckCircle className="w-8 h-8 text-white" />
                 </div>
                 <h1 className="text-3xl font-bold mb-2">
@@ -189,14 +189,14 @@ export default function SacredEdgePage() {
               </div>
 
               {/* Sacred Edge */}
-              <Card className="mb-8 border-2 border-orange-200 dark:border-orange-800 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950 dark:to-red-950">
+              <Card className="mb-8 border-2 border-indigo-200 dark:border-indigo-800 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950">
                 <CardHeader>
-                  <CardTitle className="text-center text-orange-800 dark:text-orange-200">
+                  <CardTitle className="text-center text-indigo-800 dark:text-indigo-200">
                     🎯 Your Sacred Edge
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-lg text-center font-medium text-orange-900 dark:text-orange-100">
+                  <p className="text-lg text-center font-medium text-indigo-900 dark:text-indigo-100">
                     {sacredEdgeResult.edge}
                   </p>
                 </CardContent>
@@ -266,12 +266,12 @@ export default function SacredEdgePage() {
 
               {/* Actions */}
               <div className="mt-8 text-center space-y-4">
-                <div className="bg-gradient-to-r from-orange-100 to-red-100 dark:from-orange-950 dark:to-red-950 rounded-lg p-4 border border-orange-200 dark:border-orange-800">
-                  <p className="text-sm italic font-medium text-orange-800 dark:text-orange-200">
+                <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950 rounded-lg p-4 border border-indigo-200 dark:border-indigo-800">
+                  <p className="text-sm italic font-medium text-indigo-800 dark:text-indigo-200">
                     &quot;The cave you fear to enter holds the treasure you
                     seek. Your Sacred Edge is calling - will you answer?&quot;
                   </p>
-                  <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
+                  <p className="text-xs text-indigo-600 dark:text-indigo-400 mt-1">
                     - Akshay Nanavati
                   </p>
                 </div>
@@ -279,7 +279,7 @@ export default function SacredEdgePage() {
                   <Button onClick={resetJourney} variant="outline">
                     Retake Assessment
                   </Button>
-                  <Button className="bg-orange-600 hover:bg-orange-700">
+                  <Button className="bg-gradient-to-r from-indigo-500 via-purple-500 to-violet-500 hover:shadow-lg hover:shadow-indigo-500/25">
                     Save My Sacred Edge
                   </Button>
                 </div>
@@ -302,13 +302,13 @@ export default function SacredEdgePage() {
 
   return (
     <MainLayout>
-      <div className="min-h-full bg-gradient-to-br from-background via-background to-orange-50/20 dark:to-orange-950/20">
+      <div className="min-h-full bg-gradient-to-br from-background via-background to-indigo-50/20 dark:to-indigo-950/20">
         {/* Header */}
         <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="container mx-auto px-4 py-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 via-purple-500 to-violet-500 rounded-xl flex items-center justify-center">
                   <Target className="w-6 h-6 text-white" />
                 </div>
                 <div>
@@ -321,7 +321,7 @@ export default function SacredEdgePage() {
               </div>
               <div className="text-right">
                 <div className="text-sm text-muted-foreground">Progress</div>
-                <div className="text-2xl font-bold text-orange-600">
+                <div className="text-2xl font-bold text-indigo-600">
                   {Math.round(progress)}%
                 </div>
               </div>
@@ -341,7 +341,7 @@ export default function SacredEdgePage() {
                       <div
                         className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
                           currentStep === step
-                            ? "bg-orange-600 border-orange-600 text-white"
+                            ? "bg-gradient-to-r from-indigo-500 via-purple-500 to-violet-500 border-indigo-600 text-white"
                             : responses.length > index * 2
                               ? "bg-green-100 border-green-500 text-green-700"
                               : "border-gray-300 text-gray-400"
@@ -373,8 +373,8 @@ export default function SacredEdgePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="p-4 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950 dark:to-red-950 rounded-lg border border-orange-200 dark:border-orange-800">
-                  <p className="text-lg font-medium text-orange-900 dark:text-orange-100">
+                <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950 rounded-lg border border-indigo-200 dark:border-indigo-800">
+                  <p className="text-lg font-medium text-indigo-900 dark:text-indigo-100">
                     {currentQuestion}
                   </p>
                 </div>
@@ -398,7 +398,7 @@ export default function SacredEdgePage() {
                   <Button
                     onClick={handleNextQuestion}
                     disabled={!currentAnswer.trim()}
-                    className="bg-orange-600 hover:bg-orange-700"
+                    className="bg-gradient-to-r from-indigo-500 via-purple-500 to-violet-500 hover:shadow-lg hover:shadow-indigo-500/25"
                   >
                     {currentQuestionIndex === currentPrompts.length - 1 &&
                     currentStep === "action"
@@ -421,7 +421,7 @@ export default function SacredEdgePage() {
                     {responses.slice(-3).map((response, index) => (
                       <div
                         key={index}
-                        className="border-l-4 border-orange-200 pl-4"
+                        className="border-l-4 border-indigo-200 pl-4"
                       >
                         <p className="text-sm font-medium text-muted-foreground mb-1">
                           {response.question}

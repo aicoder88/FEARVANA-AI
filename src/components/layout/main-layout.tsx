@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Sidebar } from './sidebar'
 import { Button } from '@/components/ui/button'
 import { Menu } from 'lucide-react'
+import Image from 'next/image'
 
 interface MainLayoutProps {
   children: React.ReactNode
@@ -41,7 +42,17 @@ export function MainLayout({ children }: MainLayoutProps) {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <h1 className="text-lg font-semibold">LifeLevels.AI</h1>
+          <div className="flex items-center gap-2">
+            <div className="relative h-8 w-32">
+              <Image 
+                src="/fearvana-logo.png" 
+                alt="Fearvana AI" 
+                fill
+                style={{ objectFit: 'contain' }}
+                priority
+              />
+            </div>
+          </div>
           <div className="w-10" /> {/* Spacer for centering */}
         </div>
 

@@ -25,26 +25,30 @@ export function ProgressOverview({ data, className }: ProgressOverviewProps) {
   }, 0) / data.length
 
   return (
-    <Card className={className}>
+    <Card className={`${className} card-hover-effect animate-fade-in`}>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>Progress Overview</span>
-          <span className="text-2xl font-bold text-primary">
+          <span className="interactive-element">Progress Overview</span>
+          <span className="text-2xl font-bold text-primary hover-scale">
             {Math.round(overallProgress)}%
           </span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {data.map((item) => {
+        {data.map((item, index) => {
           const category = LIFE_LEVEL_CATEGORIES[item.category]
           const progress = calculateProgress(item.current, item.goal)
           
           return (
-            <div key={item.category} className="space-y-2">
+            <div 
+              key={item.category} 
+              className="space-y-2 animate-slide-in"
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
-                  <span className="text-lg">{category.icon}</span>
-                  <span className="font-medium">{category.label}</span>
+                  <span className="text-lg hover-scale">{category.icon}</span>
+                  <span className="font-medium interactive-element">{category.label}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground">
@@ -52,12 +56,12 @@ export function ProgressOverview({ data, className }: ProgressOverviewProps) {
                   </span>
                   <div className="flex items-center gap-1">
                     {item.trend === 'up' && (
-                      <span className="text-green-600 text-xs">
+                      <span className="text-green-600 text-xs success-feedback">
                         ↗ +{item.change}%
                       </span>
                     )}
                     {item.trend === 'down' && (
-                      <span className="text-red-600 text-xs">
+                      <span className="text-red-600 text-xs error-feedback">
                         ↘ -{item.change}%
                       </span>
                     )}
@@ -71,20 +75,20 @@ export function ProgressOverview({ data, className }: ProgressOverviewProps) {
               </div>
               <Progress 
                 value={progress} 
-                className="h-2"
+                className="h-2 progress-bar-animated"
               />
             </div>
           )
         })}
         
-        <div className="pt-4 border-t">
+        <div className="pt-4 border-t animate-fade-in">
           <div className="flex items-center justify-between text-sm font-medium">
-            <span>Overall Progress</span>
-            <span className="text-primary">{Math.round(overallProgress)}%</span>
+            <span className="interactive-element">Overall Progress</span>
+            <span className="text-primary hover-scale">{Math.round(overallProgress)}%</span>
           </div>
           <Progress 
             value={overallProgress} 
-            className="h-3 mt-2"
+            className="h-3 mt-2 progress-bar-animated"
           />
         </div>
       </CardContent>

@@ -21,6 +21,7 @@ import {
   HelpCircle,
   Brain,
 } from "lucide-react";
+import Image from "next/image";
 
 interface SidebarProps {
   className?: string;
@@ -113,12 +114,15 @@ export function Sidebar({ className }: SidebarProps) {
       <div className="flex items-center justify-between p-4 border-b border-border">
         {!isCollapsed && (
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
-              <Target className="w-4 h-4 text-white" />
+            <div className="relative h-8 w-32">
+              <Image 
+                src="/fearvana-logo.png" 
+                alt="Fearvana AI" 
+                fill
+                style={{ objectFit: 'contain' }}
+                priority
+              />
             </div>
-            <span className="font-semibold text-lg bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-              Fearvana AI
-            </span>
           </div>
         )}
         <Button

@@ -35,67 +35,63 @@ export function DailyChecklist({
   const completionRate = items.length > 0 ? (completedItems.length / items.length) * 100 : 0
 
   return (
-    <Card className={className}>
+    <Card className={`${className} card-hover-effect animate-fade-in`}>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>Daily Checklist</span>
+          <span className="interactive-element">Daily Checklist</span>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-muted-foreground hover-feedback">
               {earnedPoints}/{totalPoints} pts
             </span>
-            <span className="text-sm font-bold text-primary">
+            <span className="text-sm font-bold text-primary hover-scale">
               {Math.round(completionRate)}%
             </span>
           </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
-        {items.map((item) => {
-          const category = LIFE_LEVEL_CATEGORIES[item.category]
-          
-          return (
-            <div
-              key={item.id}
-              className={`flex items-start gap-3 p-3 rounded-lg border transition-all duration-200 ${
-                item.completed 
-                  ? 'bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800' 
-                  : 'bg-muted/30 border-border hover:bg-muted/50'
-              }`}
-            >
+      <CardContent className="space-y-4">
+        {items.map((item, index) => (
+          <div 
+            key={item.id}
+            className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-all duration-200 animate-slide-in"
+            style={{ animationDelay: `${index * 100}ms` }}
+          >
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => onToggleItem(item.id)}
-                className={`flex items-center justify-center w-5 h-5 rounded border-2 transition-all duration-200 ${
-                  item.completed
-                    ? 'bg-green-500 border-green-500 text-white'
-                    : 'border-muted-foreground hover:border-primary'
+                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 click-feedback ${
+                  item.completed 
+                    ? 'bg-primary border-primary text-white' 
+                    : 'border-muted-foreground/30 hover:border-primary/50'
                 }`}
               >
-                {item.completed && <Check className="w-3 h-3" />}
-              </button>
-              
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm">{category.icon}</span>
-                  <span className={`font-medium text-sm ${
-                    item.completed ? 'line-through text-muted-foreground' : ''
-                  }`}>
-                    {item.title}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    +{item.points}
-                  </span>
-                </div>
-                {item.description && (
-                  <p className={`text-xs text-muted-foreground ${
-                    item.completed ? 'line-through' : ''
-                  }`}>
-                    {item.description}
-                  </p>
+                {item.completed && (
+                  <svg
+                    className="w-3 h-3 animate-fade-in"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
                 )}
-              </div>
+              </button>
+              <span className={`font-medium transition-all duration-200 ${
+                item.completed ? 'text-muted-foreground line-through' : ''
+              }`}>
+                {item.title}
+              </span>
             </div>
-          )
-        })}
+            <span className="text-sm text-muted-foreground hover-feedback">
+              {item.points} pts
+            </span>
+          </div>
+        ))}
         
         {items.length === 0 && (
           <div className="text-center py-8 text-muted-foreground">
@@ -105,15 +101,15 @@ export function DailyChecklist({
         )}
         
         {onAddItem && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onAddItem}
-            className="w-full mt-4"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add Task
-          </Button>
+          <div className="pt-4 border-t animate-fade-in">
+            <button
+              onClick={onAddItem}
+              className="w-full py-2 px-4 rounded-lg bg-primary/5 hover:bg-primary/10 text-primary font-medium transition-all duration-200 click-feedback"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add New Item
+            </button>
+          </div>
         )}
         
         {items.length > 0 && (

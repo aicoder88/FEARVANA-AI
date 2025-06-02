@@ -11,6 +11,9 @@ const nextConfig: NextConfig = {
     // your project has type errors.
     ignoreBuildErrors: true,
   },
+  images: {
+    unoptimized: true, // This allows serving static images without optimization
+  },
 };
 
 export default nextConfig;

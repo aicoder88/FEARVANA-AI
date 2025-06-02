@@ -11,6 +11,9 @@ import {
 import { FEARVANA_LIFE_AREAS } from "@/lib/constants";
 import { BarChart3, TrendingUp, Target, Plus, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Progress } from "@/components/ui/progress";
+import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts";
 
 interface LifeAreaScore {
   category: string;
@@ -74,6 +77,7 @@ const SAMPLE_SCORES: LifeAreaScore[] = [
 
 export default function LifeLevelsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const router = useRouter();
 
   const overallScore = Math.round(
     SAMPLE_SCORES.reduce((sum, score) => sum + score.current, 0) /
@@ -107,6 +111,43 @@ export default function LifeLevelsPage() {
     return "bg-red-500";
   };
 
+  const metrics = [
+    {
+      key: "overallScore",
+      label: "Overall Score",
+      value: overallScore,
+      target: 100,
+      unit: "/100",
+      color: "hsl(var(--primary))",
+    },
+    {
+      key: "goalsAchieved",
+      label: "Goals Achieved",
+      value: goalsAchieved,
+      target: SAMPLE_SCORES.length,
+      unit: "",
+      color: "hsl(var(--primary))",
+    },
+    {
+      key: "improvingAreas",
+      label: "Improving Areas",
+      value: improvingAreas,
+      target: SAMPLE_SCORES.length,
+      unit: "",
+      color: "hsl(var(--primary))",
+    },
+  ];
+
+  const radarData = [
+    { category: "mindset_maturity", value: 75 },
+    { category: "family_relationships", value: 82 },
+    { category: "money", value: 65 },
+    { category: "fitness", value: 70 },
+    { category: "health", value: 78 },
+    { category: "skill_building", value: 68 },
+    { category: "fun_joy", value: 85 },
+  ];
+
   return (
     <MainLayout>
       <div className="min-h-full bg-gradient-to-br from-background via-background to-blue-50/20 dark:to-blue-950/20">
@@ -139,210 +180,85 @@ export default function LifeLevelsPage() {
 
         {/* Main Content */}
         <main className="container mx-auto px-4 py-8">
-          <div className="max-w-6xl mx-auto">
-            {/* Key Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">
-                    {overallScore}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Overall Score
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <div className="text-3xl font-bold text-green-600 mb-2">
-                    {goalsAchieved}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Goals Achieved
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <div className="text-3xl font-bold text-orange-600 mb-2">
-                    {improvingAreas}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Improving Areas
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <div className="text-3xl font-bold text-purple-600 mb-2">
-                    7
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Active Areas
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-              {/* Radar Chart */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Life Areas Overview</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <LifeLevelsRadarChart
-                    data={sampleRadarData}
-                    className="h-80"
-                  />
-                </CardContent>
-              </Card>
-
-              {/* Quick Actions */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="w-5 h-5" />
-                    Sacred Edge Focus
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-4 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950 dark:to-red-950 rounded-lg border border-orange-200 dark:border-orange-800">
-                    <h3 className="font-semibold text-orange-800 dark:text-orange-200 mb-2">
-                      Recommended Focus Area
-                    </h3>
-                    <p className="text-sm text-orange-700 dark:text-orange-300 mb-3">
-                      Your <strong>Wealth</strong> area has the biggest gap
-                      between current and goal. This could be your Sacred Edge.
-                    </p>
-                    <Link href="/levels/money">
-                      <Button className="bg-orange-600 hover:bg-orange-700 text-white">
-                        Focus on Wealth
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </Button>
-                    </Link>
-                  </div>
-
-                  <div className="space-y-3">
-                    <h4 className="font-medium">Quick Actions:</h4>
-                    <div className="space-y-2">
-                      <Link href="/sacred-edge">
-                        <Button
-                          variant="outline"
-                          className="w-full justify-start"
-                        >
-                          <Target className="w-4 h-4 mr-2" />
-                          Find Your Sacred Edge
-                        </Button>
-                      </Link>
-                      <Link href="/tasks">
-                        <Button
-                          variant="outline"
-                          className="w-full justify-start"
-                        >
-                          <Plus className="w-4 h-4 mr-2" />
-                          Get Daily Tasks
-                        </Button>
-                      </Link>
-                      <Link href="/chat">
-                        <Button
-                          variant="outline"
-                          className="w-full justify-start"
-                        >
-                          <Target className="w-4 h-4 mr-2" />
-                          Ask AI Akshay
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Life Areas Grid */}
-            <Card>
-              <CardHeader>
-                <CardTitle>All Life Areas</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {SAMPLE_SCORES.map((score) => {
-                    const area =
-                      FEARVANA_LIFE_AREAS[
-                        score.category as keyof typeof FEARVANA_LIFE_AREAS
-                      ];
-                    const progressPercentage =
-                      (score.current / score.goal) * 100;
-
-                    return (
-                      <Link
-                        key={score.category}
-                        href={`/levels/${score.category}`}
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-subtle opacity-50" />
+            <div className="relative z-10">
+              {/* Key Metrics */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                {metrics.map((metric, index) => (
+                  <Card 
+                    key={metric.key} 
+                    className="card-hover-effect animate-slide-in card-content-transition"
+                    style={{ 
+                      animationDelay: `${index * 100}ms`,
+                      background: `linear-gradient(to bottom right, 
+                        hsl(var(--background)), 
+                        hsl(var(--background)), 
+                        ${metric.color}10)`
+                    }}
+                  >
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-muted-foreground interactive-element">
+                        {metric.label}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div 
+                        className="text-2xl font-bold hover-scale"
+                        style={{ 
+                          color: metric.color,
+                          textShadow: '0 0 20px ' + metric.color + '20'
+                        }}
                       >
-                        <div className="p-6 rounded-lg border hover:shadow-md transition-shadow cursor-pointer">
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-3">
-                              <span className="text-3xl">{area.icon}</span>
-                              <div>
-                                <h3 className="font-semibold text-lg">
-                                  {area.label}
-                                </h3>
-                                <p className="text-sm text-muted-foreground">
-                                  {area.description}
-                                </p>
-                              </div>
-                            </div>
-                            {getTrendIcon(score.trend)}
-                          </div>
+                        {metric.value.toLocaleString()}{metric.unit}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1 hover-feedback">
+                        Target: {metric.target.toLocaleString()}{metric.unit}
+                      </div>
+                      <Progress 
+                        value={(metric.value / metric.target) * 100} 
+                        className="h-2 mt-2 progress-bar-animated"
+                        style={{
+                          background: metric.color + '20',
+                          '--progress-color': metric.color
+                        } as any}
+                      />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
 
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between text-sm">
-                              <span>
-                                Current: <strong>{score.current}/100</strong>
-                              </span>
-                              <span>
-                                Goal: <strong>{score.goal}/100</strong>
-                              </span>
-                            </div>
-
-                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                              <div
-                                className={`h-3 rounded-full transition-all duration-300 ${getProgressColor(score.current, score.goal)}`}
-                                style={{
-                                  width: `${Math.min(progressPercentage, 100)}%`,
-                                }}
-                              />
-                            </div>
-
-                            <div className="flex items-center justify-between text-xs text-muted-foreground">
-                              <span>
-                                {Math.round(progressPercentage)}% of goal
-                              </span>
-                              <span>Updated {score.lastUpdated}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
-                    );
-                  })}
+              {/* Charts Section */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2 space-y-6">
+                  {/* Life Levels Overview */}
+                  <Card className="card-hover-effect animate-fade-in">
+                    <CardHeader>
+                      <CardTitle className="interactive-element">Life Levels Overview</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-[400px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <RadarChart data={radarData}>
+                            <PolarGrid strokeDasharray="3 3" className="text-muted" />
+                            <PolarAngleAxis dataKey="category" className="text-sm" />
+                            <PolarRadiusAxis angle={30} domain={[0, 100]} />
+                            <Radar
+                              name="Current"
+                              dataKey="value"
+                              stroke="hsl(var(--primary))"
+                              fill="hsl(var(--primary))"
+                              fillOpacity={0.2}
+                              className="trend-line"
+                            />
+                          </RadarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Sacred Edge Reminder */}
-            <Card className="mt-8 border-2 border-orange-200 dark:border-orange-800 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950 dark:to-red-950">
-              <CardContent className="p-6 text-center">
-                <div className="text-2xl mb-3">🎯</div>
-                <p className="text-sm italic font-medium text-orange-800 dark:text-orange-200 mb-2">
-                  "Your life levels are not just numbers - they're a map to your
-                  Sacred Edge. The area you're avoiding is often where your
-                  greatest growth lies."
-                </p>
-                <p className="text-xs text-orange-600 dark:text-orange-400">
-                  - Akshay Nanavati
-                </p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         </main>
       </div>
