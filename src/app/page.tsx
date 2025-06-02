@@ -17,6 +17,7 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 interface SacredEdgeStatus {
   currentFocus: string;
@@ -83,8 +84,14 @@ export default function FearvanaHomePage() {
           <div className="container mx-auto px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 group">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary via-accent to-primary rounded-xl flex items-center justify-center shadow-xl group-hover:shadow-2xl transition-all duration-500 hover:scale-105 glow-effect-intense">
-                  <Target className="w-4 h-4 text-white animate-pulse" />
+                <div className="w-8 h-8 bg-gradient-to-br from-primary via-accent to-primary rounded-xl flex items-center justify-center shadow-xl group-hover:shadow-2xl transition-all duration-500 hover:scale-105 glow-effect-intense overflow-hidden">
+                  <Image 
+                    src="/fearv.jpeg" 
+                    alt="Fearvana Logo" 
+                    width={32} 
+                    height={32}
+                    className="object-cover"
+                  />
                 </div>
                 <div className="space-y-0.5">
                   <h1 className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent hover:scale-105 transition-transform duration-300">
