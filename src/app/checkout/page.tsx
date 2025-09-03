@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -35,7 +35,7 @@ const MOCK_PRODUCT: AICoachingProduct = {
   status: 'active'
 }
 
-export default function CheckoutPage() {
+function CheckoutPageContent() {
   const searchParams = useSearchParams()
   const productId = searchParams.get('product') || 'fearvana-ai-coach'
   
@@ -400,5 +400,15 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+      <div className="text-white">Loading...</div>
+    </div>}>
+      <CheckoutPageContent />
+    </Suspense>
   )
 }
