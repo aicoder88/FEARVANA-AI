@@ -1,9 +1,17 @@
 /**
- * DEPRECATED: This file is kept for backward compatibility
- * Please use imports from '@/constants/*' instead
+ * Constants Module
  *
- * @deprecated Use individual constant modules from '@/constants/*'
+ * This file re-exports all constants from the split constant files.
+ * For new code, prefer importing directly from the specific constant file:
+ *
+ * import { FEARVANA_LIFE_AREAS } from '@/lib/constants/life-areas'
+ * import { AI_MODELS } from '@/lib/constants/ai'
+ * import { SPIRAL_DYNAMICS_LEVELS } from '@/lib/constants/spiral-dynamics'
  */
 
-// Re-export all constants for backward compatibility
-export * from '@/constants'
+// Re-export everything from the split constant files
+export * from "./constants/life-areas";
+export * from "./constants/ui";
+export * from "./constants/ai";
+export * from "./constants/spiral-dynamics";
+export * from "./constants/gamification";

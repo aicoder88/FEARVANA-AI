@@ -1,0 +1,44 @@
+// Life Areas & Scoring
+export {
+  FEARVANA_LIFE_AREAS,
+  LIFE_LEVEL_CATEGORIES,
+  SCORE_RANGES,
+} from "./life-areas";
+
+// UI Constants
+export {
+  CHART_COLORS,
+  ANIMATION_DURATIONS,
+  BREAKPOINTS,
+  DEFAULT_DASHBOARD_LAYOUT,
+  NOTIFICATION_TYPES,
+  LOCAL_STORAGE_KEYS,
+} from "./ui";
+
+// AI Configuration
+export {
+  API_ENDPOINTS,
+  AI_MODELS,
+  ENCRYPTION_CONFIG,
+  SACRED_EDGE_PROMPTS,
+  FEARVANA_AI_PROMPTS,
+  COACH_PROMPTS,
+} from "./ai";
+
+// Spiral Dynamics
+export {
+  SPIRAL_DYNAMICS_LEVELS,
+  AQAL_QUADRANTS,
+  DEVELOPMENTAL_LINES,
+  SPIRAL_COACHING_INSIGHTS,
+  PROGRESSION_MECHANICS,
+  READINESS_INDICATORS,
+} from "./spiral-dynamics";
+
+// Gamification
+export {
+  ENHANCED_COACH_PROMPTS,
+  XP_SYSTEM,
+  CHALLENGE_TEMPLATES,
+  ACHIEVEMENT_BADGES,
+} from "./gamification";

@@ -51,14 +51,11 @@ export default function LoginPage() {
 
       if (response.ok) {
         setSuccess('Welcome back to your transformation journey!')
-        
-        // Store session token
-        localStorage.setItem('fearvana_token', data.session.token)
-        localStorage.setItem('fearvana_user', JSON.stringify(data.session.user))
-        
+
+        // Auth token is now stored in HTTP-only cookie by the server
         // Redirect based on user type
         setTimeout(() => {
-          if (data.session.user.subscription?.tier === 'enterprise') {
+          if (data.user?.subscription?.tier === 'enterprise') {
             router.push('/dashboard/corporate')
           } else {
             router.push('/dashboard')
@@ -98,10 +95,9 @@ export default function LoginPage() {
         })
 
         const data = await response.json()
-        
+
         if (response.ok) {
-          localStorage.setItem('fearvana_token', data.session.token)
-          localStorage.setItem('fearvana_user', JSON.stringify(data.session.user))
+          // Auth token is now stored in HTTP-only cookie by the server
           router.push('/dashboard')
         }
       } catch (error) {
