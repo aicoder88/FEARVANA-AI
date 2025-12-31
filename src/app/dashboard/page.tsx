@@ -93,7 +93,9 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white">Loading your transformation dashboard...</div>
+        <div className="text-white" role="status" aria-live="polite">
+          Loading your transformation dashboard...
+        </div>
       </div>
     )
   }
@@ -107,7 +109,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex justify-between items-start mb-8">
+        <header className="flex justify-between items-start mb-8" role="banner">
           <div>
             <h1 className="text-4xl font-bold text-white mb-2">
               Welcome back, <span className="text-orange-400">{user.name.split(' ')[0]}</span>
@@ -117,36 +119,40 @@ export default function DashboardPage() {
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="outline" className="border-slate-600 text-gray-300 hover:bg-slate-700">
-              <Settings className="w-4 h-4 mr-2" />
+            <Button
+              variant="outline"
+              className="border-slate-600 text-gray-300 hover:bg-slate-700"
+              aria-label="Open settings"
+            >
+              <Settings className="w-4 h-4 mr-2" aria-hidden="true" />
               Settings
             </Button>
-            <Avatar className="w-10 h-10">
-              <AvatarFallback className="bg-orange-500 text-white">
+            <Avatar className="w-10 h-10" aria-label={`${user.name}'s profile`}>
+              <AvatarFallback className="bg-orange-500 text-white" aria-hidden="true">
                 {user.name.split(' ').map(n => n[0]).join('')}
               </AvatarFallback>
             </Avatar>
           </div>
-        </div>
+        </header>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <main className="lg:col-span-2 space-y-6" role="main" id="main-content">
             {/* Subscription Status */}
             {user.subscription && (
-              <Card className="bg-slate-800 border-slate-700">
+              <Card className="bg-slate-800 border-slate-700" role="region" aria-labelledby="subscription-heading">
                 <CardHeader>
                   <div className="flex justify-between items-start">
                     <div>
-                      <CardTitle className="text-white flex items-center gap-2">
-                        <Mountain className="w-5 h-5 text-orange-400" />
+                      <CardTitle id="subscription-heading" className="text-white flex items-center gap-2">
+                        <Mountain className="w-5 h-5 text-orange-400" aria-hidden="true" />
                         {user.subscription.productName}
                       </CardTitle>
                       <CardDescription className="text-gray-400">
                         {user.subscription.tier.charAt(0).toUpperCase() + user.subscription.tier.slice(1)} Plan
                       </CardDescription>
                     </div>
-                    <Badge className={getStatusColor(user.subscription.status)}>
+                    <Badge className={getStatusColor(user.subscription.status)} aria-label={`Subscription status: ${user.subscription.status}`}>
                       {user.subscription.status}
                     </Badge>
                   </div>
@@ -172,9 +178,9 @@ export default function DashboardPage() {
 
             {/* Usage Overview */}
             {usage && (
-              <Card className="bg-slate-800 border-slate-700">
+              <Card className="bg-slate-800 border-slate-700" role="region" aria-labelledby="usage-heading">
                 <CardHeader>
-                  <CardTitle className="text-white">Usage This Month</CardTitle>
+                  <CardTitle id="usage-heading" className="text-white">Usage This Month</CardTitle>
                   <CardDescription className="text-gray-400">
                     Track your AI coaching and insights consumption
                   </CardDescription>
@@ -184,16 +190,17 @@ export default function DashboardPage() {
                     <div>
                       <div className="flex justify-between items-center mb-2">
                         <div className="flex items-center gap-2">
-                          <MessageSquare className="w-4 h-4 text-blue-400" />
+                          <MessageSquare className="w-4 h-4 text-blue-400" aria-hidden="true" />
                           <span className="text-gray-300">AI Chat Messages</span>
                         </div>
-                        <span className="text-gray-400 text-sm">
+                        <span className="text-gray-400 text-sm" aria-label={`${usage.aiChatMessages} of ${usage.aiChatLimit} messages used`}>
                           {usage.aiChatMessages}/{usage.aiChatLimit}
                         </span>
                       </div>
-                      <Progress 
-                        value={getUsagePercentage(usage.aiChatMessages, usage.aiChatLimit)} 
+                      <Progress
+                        value={getUsagePercentage(usage.aiChatMessages, usage.aiChatLimit)}
                         className="h-2"
+                        aria-label={`AI chat messages usage: ${getUsagePercentage(usage.aiChatMessages, usage.aiChatLimit)}%`}
                       />
                     </div>
 
@@ -285,7 +292,7 @@ export default function DashboardPage() {
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </main>
 
           {/* Sidebar */}
           <div className="space-y-6">

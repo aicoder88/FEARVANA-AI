@@ -8,13 +8,17 @@ import { CHALLENGE_TEMPLATES, XP_SYSTEM } from '@/lib/constants'
 import { GrowthChallenge, SpiralLevel, ProgressionStep } from '@/lib/database.types'
 import { Trophy, Clock, Zap, Target, CheckCircle, Star } from 'lucide-react'
 
-interface ChallengeGeneratorProps {
-  currentLevel: SpiralLevel
-  currentStep: ProgressionStep
-  userCapacity: number // 1-5 scale
-  onChallengeAccept: (challenge: any) => void
-  onChallengeComplete: (challengeId: string, quality: number) => void
-  className?: string
+interface UpgradeTool {
+  type: string
+  description?: string
+  resources?: string[]
+}
+
+interface SuccessCriteria {
+  completion_time: number
+  quality_threshold: number
+  reflection_required: boolean
+  specific_actions?: string[]
 }
 
 interface GeneratedChallenge {
@@ -25,14 +29,23 @@ interface GeneratedChallenge {
   title: string
   description: string
   personalizedDescription: string
-  upgrade_tools: any
+  upgrade_tools: string[] | UpgradeTool[]
   xp_reward: number
   difficulty_level: number
   estimated_time: string
-  success_criteria: any
+  success_criteria: SuccessCriteria
   is_active: boolean
   created_at: string
   isGenerated: boolean
+}
+
+interface ChallengeGeneratorProps {
+  currentLevel: SpiralLevel
+  currentStep: ProgressionStep
+  userCapacity: number // 1-5 scale
+  onChallengeAccept: (challenge: GeneratedChallenge) => void
+  onChallengeComplete: (challengeId: string, quality: number) => void
+  className?: string
 }
 
 export function ChallengeGenerator({ 
@@ -116,21 +129,21 @@ export function ChallengeGenerator({
     return Math.round(baseXp * capacityMultiplier)
   }
 
-  const generateSuccessCriteria = (challengeType: string, level: SpiralLevel) => {
-    const baseCriteria = {
+  const generateSuccessCriteria = (challengeType: string, level: SpiralLevel): SuccessCriteria => {
+    const baseCriteria: SuccessCriteria = {
       completion_time: 30,
       quality_threshold: 3,
       reflection_required: true
     }
-    
-    const levelSpecificCriteria: Partial<Record<SpiralLevel, typeof baseCriteria & { specific_actions: string[] }>> = {
+
+    const levelSpecificCriteria: Partial<Record<SpiralLevel, SuccessCriteria>> = {
       red: { ...baseCriteria, specific_actions: ['Demonstrate strength', 'Show results'] },
       blue: { ...baseCriteria, specific_actions: ['Follow structure', 'Serve purpose'] },
       orange: { ...baseCriteria, specific_actions: ['Measure results', 'Optimize process'] },
       green: { ...baseCriteria, specific_actions: ['Include others', 'Build consensus'] },
       yellow: { ...baseCriteria, specific_actions: ['See connections', 'Integrate perspectives'] }
     }
-    
+
     return levelSpecificCriteria[level] || baseCriteria
   }
 

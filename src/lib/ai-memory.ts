@@ -1,5 +1,8 @@
 import { openaiService } from './openai-service'
 
+// Type-safe goal value types
+type GoalValue = string | number | boolean | Date
+
 interface UserMemory {
   supplements: Array<{
     name: string
@@ -14,8 +17,8 @@ interface UserMemory {
     intensity: number
   }>
   goals: Record<string, {
-    target: any
-    current: any
+    target: GoalValue
+    current: GoalValue
     deadline?: Date
     priority: number
   }>
@@ -95,13 +98,20 @@ class AIMemoryService {
     }
   }
 
-  private deserializeDates(obj: any) {
+  private deserializeDates(obj: Record<string, unknown>): void {
     if (obj && typeof obj === 'object') {
       for (const key in obj) {
-        if (obj[key] && typeof obj[key] === 'string' && obj[key].match(/^\d{4}-\d{2}-\d{2}T/)) {
-          obj[key] = new Date(obj[key])
-        } else if (obj[key] && typeof obj[key] === 'object') {
-          this.deserializeDates(obj[key])
+        const value = obj[key]
+        if (value && typeof value === 'string' && value.match(/^\d{4}-\d{2}-\d{2}T/)) {
+          obj[key] = new Date(value)
+        } else if (value && typeof value === 'object' && !Array.isArray(value)) {
+          this.deserializeDates(value as Record<string, unknown>)
+        } else if (Array.isArray(value)) {
+          value.forEach(item => {
+            if (item && typeof item === 'object') {
+              this.deserializeDates(item as Record<string, unknown>)
+            }
+          })
         }
       }
     }
@@ -147,12 +157,12 @@ class AIMemoryService {
     return 'night'
   }
 
-  private getTodaysProgress() {
+  private getTodaysProgress(): Record<string, { date: Date; value: number; notes?: string }> {
     const today = new Date().toDateString()
-    const todaysProgress: Record<string, any> = {}
+    const todaysProgress: Record<string, { date: Date; value: number; notes?: string }> = {}
 
     for (const [category, progressArray] of Object.entries(this.memory.progress)) {
-      const todaysEntry = progressArray.find(entry => 
+      const todaysEntry = progressArray.find(entry =>
         new Date(entry.date).toDateString() === today
       )
       if (todaysEntry) {

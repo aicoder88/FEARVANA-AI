@@ -103,21 +103,22 @@ export function Sidebar({ className }: SidebarProps) {
   ];
 
   return (
-    <div
+    <nav
       className={cn(
         "flex flex-col h-full bg-card border-r border-border transition-all duration-300",
         isCollapsed ? "w-16" : "w-64",
         className,
       )}
+      aria-label="Main navigation"
     >
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-border">
         {!isCollapsed && (
           <div className="flex items-center gap-2">
             <div className="relative h-8 w-32">
-              <Image 
-                src="/fearvana-logo.png" 
-                alt="Fearvana AI" 
+              <Image
+                src="/fearvana-logo.png"
+                alt="Fearvana AI Logo - Navigate to home"
                 fill
                 style={{ objectFit: 'contain' }}
                 priority
@@ -130,20 +131,23 @@ export function Sidebar({ className }: SidebarProps) {
           size="icon"
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="h-8 w-8"
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-expanded={!isCollapsed}
+          aria-controls="sidebar-content"
         >
           {isCollapsed ? (
-            <Menu className="h-4 w-4" />
+            <Menu className="h-4 w-4" aria-hidden="true" />
           ) : (
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4" aria-hidden="true" />
           )}
         </Button>
       </div>
 
       {/* Main Navigation */}
-      <div className="flex-1 overflow-y-auto">
-        <nav className="p-2 space-y-1">
+      <div className="flex-1 overflow-y-auto" id="sidebar-content">
+        <div className="p-2 space-y-1">
           {/* Main Items */}
-          <div className="space-y-1">
+          <div className="space-y-1" role="group" aria-label="Main navigation items">
             {!isCollapsed && (
               <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Main
@@ -163,8 +167,11 @@ export function Sidebar({ className }: SidebarProps) {
                         : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                       isCollapsed && "justify-center",
                     )}
+                    role="button"
+                    aria-label={`${item.title}${item.description ? ` - ${item.description}` : ''}`}
+                    aria-current={isActive ? "page" : undefined}
                   >
-                    <Icon className="h-4 w-4 flex-shrink-0" />
+                    <Icon className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
                     {!isCollapsed && (
                       <div className="flex-1 min-w-0">
                         <div className="truncate">{item.title}</div>
@@ -182,7 +189,7 @@ export function Sidebar({ className }: SidebarProps) {
           </div>
 
           {/* Life Levels */}
-          <div className="space-y-1 pt-4">
+          <div className="space-y-1 pt-4" role="group" aria-label="Life areas navigation">
             {!isCollapsed && (
               <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Life Areas
@@ -201,8 +208,11 @@ export function Sidebar({ className }: SidebarProps) {
                         : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                       isCollapsed && "justify-center",
                     )}
+                    role="button"
+                    aria-label={item.title}
+                    aria-current={isActive ? "page" : undefined}
                   >
-                    <span className="text-lg flex-shrink-0">{item.icon}</span>
+                    <span className="text-lg flex-shrink-0" role="img" aria-label={`${item.title} icon`}>{item.icon}</span>
                     {!isCollapsed && (
                       <span className="truncate">{item.title}</span>
                     )}
@@ -211,11 +221,11 @@ export function Sidebar({ className }: SidebarProps) {
               );
             })}
           </div>
-        </nav>
+        </div>
       </div>
 
       {/* Bottom Navigation */}
-      <div className="border-t border-border p-2 space-y-1">
+      <div className="border-t border-border p-2 space-y-1" role="group" aria-label="Account and settings navigation">
         {bottomNavItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
@@ -230,14 +240,17 @@ export function Sidebar({ className }: SidebarProps) {
                     : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                   isCollapsed && "justify-center",
                 )}
+                role="button"
+                aria-label={item.title}
+                aria-current={isActive ? "page" : undefined}
               >
-                <Icon className="h-4 w-4 flex-shrink-0" />
+                <Icon className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
                 {!isCollapsed && <span className="truncate">{item.title}</span>}
               </div>
             </Link>
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 }

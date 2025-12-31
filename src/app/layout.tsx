@@ -92,6 +92,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background font-sans`}
       >
+        <a href="#main-content" className="skip-to-content">
+          Skip to main content
+        </a>
         <Providers>
           <TempoInit />
           <div className="relative flex min-h-screen flex-col">

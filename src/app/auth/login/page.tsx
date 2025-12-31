@@ -116,14 +116,14 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center items-center gap-4 text-sm text-gray-400 mb-4">
-            <div className="flex items-center gap-2">
-              <Shield className="w-4 h-4 text-orange-400" />
+        <header className="text-center mb-8" role="banner">
+          <div className="flex justify-center items-center gap-4 text-sm text-gray-400 mb-4" role="list" aria-label="Platform credentials">
+            <div className="flex items-center gap-2" role="listitem">
+              <Shield className="w-4 h-4 text-orange-400" aria-hidden="true" />
               <span>Marine Veteran</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Mountain className="w-4 h-4 text-orange-400" />
+            <div className="flex items-center gap-2" role="listitem">
+              <Mountain className="w-4 h-4 text-orange-400" aria-hidden="true" />
               <span>Antarctica Explorer</span>
             </div>
           </div>
@@ -133,10 +133,10 @@ export default function LoginPage() {
           <p className="text-gray-400">
             Continue your Sacred Edge transformation journey
           </p>
-        </div>
+        </header>
 
         {/* Login Form */}
-        <Card className="bg-slate-800 border-slate-700">
+        <Card className="bg-slate-800 border-slate-700" role="main">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-white text-center">Sign In</CardTitle>
             <CardDescription className="text-gray-400 text-center">
@@ -145,8 +145,8 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             {error && (
-              <Alert className="border-red-500 bg-red-500/10">
-                <AlertCircle className="h-4 w-4 text-red-500" />
+              <Alert className="border-red-500 bg-red-500/10" role="alert" aria-live="assertive">
+                <AlertCircle className="h-4 w-4 text-red-500" aria-hidden="true" />
                 <AlertDescription className="text-red-400">
                   {error}
                 </AlertDescription>
@@ -154,15 +154,15 @@ export default function LoginPage() {
             )}
 
             {success && (
-              <Alert className="border-green-500 bg-green-500/10">
-                <CheckCircle className="h-4 w-4 text-green-500" />
+              <Alert className="border-green-500 bg-green-500/10" role="status" aria-live="polite">
+                <CheckCircle className="h-4 w-4 text-green-500" aria-hidden="true" />
                 <AlertDescription className="text-green-400">
                   {success}
                 </AlertDescription>
               </Alert>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4" aria-label="Sign in form">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-gray-300">Email</Label>
                 <Input
@@ -173,6 +173,9 @@ export default function LoginPage() {
                   onChange={(e) => handleInputChange('email', e.target.value)}
                   className="bg-slate-700 border-slate-600 text-white placeholder:text-gray-400"
                   required
+                  aria-required="true"
+                  aria-invalid={error && error.includes('email') ? 'true' : 'false'}
+                  autoComplete="email"
                 />
               </div>
 
@@ -187,6 +190,9 @@ export default function LoginPage() {
                     onChange={(e) => handleInputChange('password', e.target.value)}
                     className="bg-slate-700 border-slate-600 text-white placeholder:text-gray-400 pr-10"
                     required
+                    aria-required="true"
+                    aria-invalid={error && error.includes('password') ? 'true' : 'false'}
+                    autoComplete="current-password"
                   />
                   <Button
                     type="button"
@@ -194,11 +200,13 @@ export default function LoginPage() {
                     size="sm"
                     className="absolute right-0 top-0 h-full px-3 text-gray-400 hover:text-gray-300"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    aria-pressed={showPassword}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
+                      <EyeOff className="h-4 w-4" aria-hidden="true" />
                     ) : (
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-4 w-4" aria-hidden="true" />
                     )}
                   </Button>
                 </div>
@@ -212,6 +220,7 @@ export default function LoginPage() {
                     checked={formData.rememberMe}
                     onChange={(e) => handleInputChange('rememberMe', e.target.checked)}
                     className="rounded border-slate-600 bg-slate-700"
+                    aria-label="Remember me on this device"
                   />
                   <Label htmlFor="remember" className="text-sm text-gray-400">
                     Remember me
@@ -219,7 +228,7 @@ export default function LoginPage() {
                 </div>
                 <Link
                   href="/auth/forgot-password"
-                  className="text-sm text-orange-400 hover:text-orange-300"
+                  className="text-sm text-orange-400 hover:text-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-slate-900 rounded"
                 >
                   Forgot password?
                 </Link>
@@ -227,12 +236,13 @@ export default function LoginPage() {
 
               <Button
                 type="submit"
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-slate-900"
                 disabled={loading}
+                aria-busy={loading}
               >
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                     Signing In...
                   </>
                 ) : (

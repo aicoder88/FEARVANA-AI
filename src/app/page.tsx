@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MainLayout } from "@/components/layout/main-layout";
@@ -61,7 +61,8 @@ export default function FearvanaHomePage() {
     return "Rest well, tomorrow we rise! 🌙";
   };
 
-  const getLifeAreaSummary = () => {
+  // Memoize life areas to avoid re-generating random scores on every render
+  const lifeAreas = useMemo(() => {
     return Object.entries(FEARVANA_LIFE_AREAS).map(([key, area]) => ({
       key,
       label: area.label,
@@ -69,9 +70,7 @@ export default function FearvanaHomePage() {
       score: Math.floor(Math.random() * 30) + 70, // Mock scores 70-100
       color: area.color,
     }));
-  };
-
-  const lifeAreas = getLifeAreaSummary();
+  }, []); // Empty deps = compute once
   const overallScore = Math.round(
     lifeAreas.reduce((sum, area) => sum + area.score, 0) / lifeAreas.length,
   );

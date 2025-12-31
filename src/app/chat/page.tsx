@@ -100,12 +100,12 @@ export default function ChatPage() {
     <MainLayout>
       <div className="min-h-full bg-gradient-to-br from-background via-background to-indigo-50/20 dark:to-indigo-950/20">
         {/* Header */}
-        <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60" role="banner">
           <div className="container mx-auto px-4 py-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 via-purple-500 to-violet-500 rounded-full flex items-center justify-center animate-pulse-slow shadow-lg shadow-indigo-500/25">
-                  <Bot className="w-5 h-5 text-white" />
+                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 via-purple-500 to-violet-500 rounded-full flex items-center justify-center animate-pulse-slow shadow-lg shadow-indigo-500/25" aria-hidden="true">
+                  <Bot className="w-5 h-5 text-white" aria-hidden="true" />
                 </div>
                 <div>
                   <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-500 via-purple-500 to-violet-500 bg-clip-text text-transparent">
@@ -116,8 +116,8 @@ export default function ChatPage() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-sm hover-feedback">
-                <div className="w-2 h-2 bg-indigo-500 rounded-full pulse"></div>
+              <div className="flex items-center gap-2 text-sm hover-feedback" role="status" aria-live="polite">
+                <div className="w-2 h-2 bg-indigo-500 rounded-full pulse" aria-hidden="true"></div>
                 <span className="text-muted-foreground">Online</span>
               </div>
             </div>
@@ -131,7 +131,13 @@ export default function ChatPage() {
             <Card className="flex-1 flex flex-col card-hover-effect bg-gradient-to-br from-background to-indigo-50/5 dark:to-indigo-950/5">
               <CardContent className="flex-1 flex flex-col p-6">
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+                <div
+                  className="flex-1 overflow-y-auto space-y-4 mb-4"
+                  role="log"
+                  aria-label="Chat conversation history"
+                  aria-live="polite"
+                  aria-atomic="false"
+                >
                   {messages.map((message, index) => (
                     <div
                       key={message.id}
@@ -139,10 +145,12 @@ export default function ChatPage() {
                         message.type === "user" ? "justify-end" : "justify-start"
                       } animate-slide-in`}
                       style={{ animationDelay: `${index * 100}ms` }}
+                      role="article"
+                      aria-label={`${message.type === "user" ? "Your message" : "AI Akshay's message"} at ${message.timestamp.toLocaleTimeString()}`}
                     >
                       {message.type === "assistant" && (
-                        <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 via-purple-500 to-violet-500 rounded-full flex items-center justify-center flex-shrink-0 hover-scale shadow-lg shadow-indigo-500/20">
-                          <Bot className="w-4 h-4 text-white" />
+                        <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 via-purple-500 to-violet-500 rounded-full flex items-center justify-center flex-shrink-0 hover-scale shadow-lg shadow-indigo-500/20" aria-hidden="true">
+                          <Bot className="w-4 w-4 text-white" aria-hidden="true" />
                         </div>
                       )}
 
@@ -173,8 +181,9 @@ export default function ChatPage() {
                               variant="ghost"
                               size="sm"
                               className="text-xs hover:bg-indigo-50 dark:hover:bg-indigo-900/50"
+                              aria-label="Play audio version of this message"
                             >
-                              <Volume2 className="w-3 h-3 mr-1" />
+                              <Volume2 className="w-3 h-3 mr-1" aria-hidden="true" />
                               Play Audio
                             </Button>
                           </div>
@@ -182,8 +191,8 @@ export default function ChatPage() {
                       </div>
 
                       {message.type === "user" && (
-                        <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 via-purple-500 to-violet-500 rounded-full flex items-center justify-center flex-shrink-0 hover-scale shadow-lg shadow-indigo-500/20">
-                          <User className="w-4 h-4 text-white" />
+                        <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 via-purple-500 to-violet-500 rounded-full flex items-center justify-center flex-shrink-0 hover-scale shadow-lg shadow-indigo-500/20" aria-hidden="true">
+                          <User className="w-4 h-4 text-white" aria-hidden="true" />
                         </div>
                       )}
                     </div>
@@ -191,12 +200,12 @@ export default function ChatPage() {
 
                   {/* Typing Indicator */}
                   {isTyping && (
-                    <div className="flex gap-3 justify-start animate-fade-in">
-                      <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 via-purple-500 to-violet-500 rounded-full flex items-center justify-center hover-scale shadow-lg shadow-indigo-500/20">
-                        <Bot className="w-4 h-4 text-white" />
+                    <div className="flex gap-3 justify-start animate-fade-in" role="status" aria-live="polite" aria-label="AI Akshay is typing">
+                      <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 via-purple-500 to-violet-500 rounded-full flex items-center justify-center hover-scale shadow-lg shadow-indigo-500/20" aria-hidden="true">
+                        <Bot className="w-4 h-4 text-white" aria-hidden="true" />
                       </div>
                       <div className="bg-white dark:bg-gray-900 rounded-lg px-4 py-3 border border-indigo-100 dark:border-indigo-900 shadow-sm">
-                        <div className="flex space-x-1">
+                        <div className="flex space-x-1" aria-hidden="true">
                           <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"></div>
                           <div
                             className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"
@@ -207,6 +216,7 @@ export default function ChatPage() {
                             style={{ animationDelay: "0.2s" }}
                           ></div>
                         </div>
+                        <span className="sr-only">AI Akshay is typing a response</span>
                       </div>
                     </div>
                   )}
@@ -215,7 +225,7 @@ export default function ChatPage() {
                 </div>
 
                 {/* Input Area */}
-                <div className="flex gap-3 items-end">
+                <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(inputValue); }} className="flex gap-3 items-end">
                   <div className="flex-1 space-y-4">
                     <Input
                       ref={inputRef}
@@ -224,10 +234,15 @@ export default function ChatPage() {
                       onKeyDown={handleKeyPress}
                       placeholder="Type your message..."
                       className="bg-white dark:bg-gray-900 border border-indigo-100 dark:border-indigo-900 focus:border-indigo-300 dark:focus:border-indigo-700 focus:ring-2 focus:ring-indigo-500/20 shadow-sm"
+                      aria-label="Type your message to AI Akshay"
+                      aria-describedby="chat-input-help"
                     />
-                    
+                    <span id="chat-input-help" className="sr-only">
+                      Press Enter to send your message, or use the quick prompts below
+                    </span>
+
                     {/* Quick Prompts */}
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2" role="group" aria-label="Quick prompt suggestions">
                       {QUICK_PROMPTS.map((prompt, index) => (
                         <Button
                           key={prompt}
@@ -236,8 +251,9 @@ export default function ChatPage() {
                           onClick={() => handleQuickPrompt(prompt)}
                           className="animate-slide-in border-indigo-200 dark:border-indigo-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/50 hover:border-indigo-300 dark:hover:border-indigo-700 shadow-sm"
                           style={{ animationDelay: `${index * 100}ms` }}
+                          aria-label={`Quick prompt: ${prompt}`}
                         >
-                          <Sparkles className="w-3 h-3 mr-1 text-indigo-500" />
+                          <Sparkles className="w-3 h-3 mr-1 text-indigo-500" aria-hidden="true" />
                           {prompt}
                         </Button>
                       ))}
@@ -245,14 +261,15 @@ export default function ChatPage() {
                   </div>
 
                   <Button
-                    onClick={() => handleSendMessage(inputValue)}
+                    type="submit"
                     size="icon"
                     className="bg-gradient-to-r from-indigo-500 via-purple-500 to-violet-500 hover:shadow-lg hover:shadow-indigo-500/25 transition-all duration-300"
                     disabled={!inputValue.trim()}
+                    aria-label="Send message"
                   >
-                    <Send className="w-4 h-4" />
+                    <Send className="w-4 h-4" aria-hidden="true" />
                   </Button>
-                </div>
+                </form>
               </CardContent>
             </Card>
           </div>

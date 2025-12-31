@@ -4,14 +4,9 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MainLayout } from "@/components/layout/main-layout";
-import {
-  LifeLevelsRadarChart,
-  sampleRadarData,
-} from "@/components/dashboard/radar-chart";
 import { FEARVANA_LIFE_AREAS } from "@/lib/constants";
-import { BarChart3, TrendingUp, Target, Plus, ArrowRight } from "lucide-react";
+import { BarChart3, TrendingUp, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Progress } from "@/components/ui/progress";
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts";
 
@@ -77,7 +72,6 @@ const SAMPLE_SCORES: LifeAreaScore[] = [
 
 export default function LifeLevelsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const router = useRouter();
 
   const overallScore = Math.round(
     SAMPLE_SCORES.reduce((sum, score) => sum + score.current, 0) /
