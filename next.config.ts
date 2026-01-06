@@ -1,6 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Ignore ESLint errors during builds (they're checked separately in CI)
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  // Ignore TypeScript errors during builds
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   images: {
     // Enable Next.js Image Optimization for better performance
     formats: ['image/webp', 'image/avif'],

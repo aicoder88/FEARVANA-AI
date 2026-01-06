@@ -88,7 +88,6 @@
     "postcss": "^8.5.3",
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.9",
-    "tempo-devtools": "^2.0.106",
     "typescript": "^5.7.2"
   },
   "engines": {

@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
-import Script from "next/script";
-import { TempoInit } from "./tempo-init";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -88,7 +86,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <Script src="https://api.tempo.new/proxy-asset?url=https://storage.googleapis.com/tempo-public-assets/error-handling.js" />
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background font-sans`}
       >
@@ -96,7 +93,6 @@ export default function RootLayout({
           Skip to main content
         </a>
         <Providers>
-          <TempoInit />
           <div className="relative flex min-h-screen flex-col">
             <div className="flex-1">{children}</div>
           </div>

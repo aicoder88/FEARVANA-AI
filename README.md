@@ -103,7 +103,6 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_key
 
 # App Configuration
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_TEMPO=true
 ```
 
 ## 📁 Project Structure
