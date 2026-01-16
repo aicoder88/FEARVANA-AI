@@ -2,6 +2,7 @@
  * AI Coach API Route
  *
  * Provides AI-powered coaching responses based on user context
+ * with integrated customer data from multiple sources
  */
 
 import { NextRequest } from 'next/server'
@@ -16,12 +17,13 @@ import {
   ValidationError,
   type RouteContext
 } from '@/lib/api'
+import { getIntegrationManager } from '@/lib/integration/manager'
 
 /**
  * Validation schemas
  */
 const chatRequestSchema = z.object({
-  context: z.string().min(1, 'Context is required'),
+  customerId: z.string().min(1, 'Customer ID is required'),
   currentAction: z
     .object({
       title: z.string(),
@@ -32,7 +34,7 @@ const chatRequestSchema = z.object({
 })
 
 const actionRequestSchema = z.object({
-  context: z.string().min(1, 'Context is required')
+  customerId: z.string().min(1, 'Customer ID is required')
 })
 
 /**
@@ -89,18 +91,28 @@ async function generateCoachingResponse(
   openai: OpenAI,
   data: ChatRequest
 ): Promise<{ response: string; usage: any }> {
-  const systemPrompt = `You are an AI life coach for LifeLevels.AI, a personal development app. Your role is to provide personalized, actionable guidance based on the user's current context and progress.
+  // Fetch customer context from integration layer
+  const integrationManager = getIntegrationManager()
+  const customerContext = await integrationManager.getCustomerContext(data.customerId)
 
-Key principles:
-- Be encouraging and supportive
-- Provide specific, actionable advice
-- Consider the user's schedule, energy levels, and current progress
+  // Build context string from customer data
+  const contextString = buildContextString(customerContext)
+
+  const systemPrompt = `You are Akshay Nanavati's AI coach for Fearvana, a personal development platform based on the Sacred Edge philosophy. Your role is to provide personalized, actionable guidance based on the customer's context and progress.
+
+Sacred Edge Philosophy:
+The Sacred Edge is the intersection of fear and excitement where real growth happens. Guide customers to face their fears systematically and unlock breakthrough performance.
+
+Key Principles:
+- Be direct, bold, and authentic like Akshay
+- Push customers beyond their comfort zone
+- Provide specific, actionable advice aligned with their Spiral Dynamics level
 - Focus on sustainable habits and gradual improvement
-- Use the Spiral Dynamics framework when relevant
-- Keep responses concise but meaningful
+- Reference their actual progress data
+- Keep responses concise but powerful
 
-User Context:
-${data.context}
+Customer Context:
+${contextString}
 
 Current Suggested Action:
 ${data.currentAction ? `${data.currentAction.title}: ${data.currentAction.description}` : 'None'}`
@@ -110,18 +122,26 @@ ${data.currentAction ? `${data.currentAction.title}: ${data.currentAction.descri
 
   try {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4',
+      model: 'gpt-4o',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
-      max_tokens: 300,
+      max_tokens: 500,
       temperature: 0.7
     })
 
     const response =
       completion.choices[0]?.message?.content ||
-      "I'm here to help you make progress on your life goals."
+      "I'm here to help you push your edges and achieve breakthrough performance."
+
+    // Log interaction to CRM
+    await integrationManager.logInteraction(data.customerId, {
+      type: 'chat',
+      timestamp: new Date(),
+      summary: `AI coaching chat: ${data.userMessage?.substring(0, 100) || 'Context-based coaching'}`,
+      sentiment: 'neutral'
+    })
 
     return {
       response,
@@ -137,6 +157,64 @@ ${data.currentAction ? `${data.currentAction.title}: ${data.currentAction.descri
 }
 
 /**
+ * Build context string from customer data
+ */
+function buildContextString(context: any): string {
+  const parts: string[] = []
+
+  // Profile
+  if (context.profile) {
+    parts.push(`Name: ${context.profile.displayName || 'Customer'}`)
+    parts.push(`Account age: ${context.profile.accountAge} days`)
+  }
+
+  // Life areas
+  if (context.lifeAreas && context.lifeAreas.length > 0) {
+    parts.push('\nLife Areas Progress:')
+    for (const area of context.lifeAreas) {
+      const trend = area.trend === 'up' ? '↑' : area.trend === 'down' ? '↓' : '→'
+      parts.push(`- ${area.category}: ${area.currentScore}/10 ${trend} (Goal: ${area.goal})`)
+    }
+  }
+
+  // Spiral Dynamics
+  if (context.spiralState) {
+    parts.push(`\nSpiral Level: ${context.spiralState.currentLevel}`)
+    parts.push(`Progress: ${context.spiralState.stepProgress}%`)
+    parts.push(`Total XP: ${context.spiralState.totalXP}`)
+  }
+
+  // Recent activity
+  if (context.recentEntries && context.recentEntries.length > 0) {
+    const lastEntry = context.recentEntries[0]
+    parts.push(`\nLast activity: ${new Date(lastEntry.timestamp).toLocaleDateString()}`)
+  }
+
+  // CRM context
+  if (context.crmContext) {
+    parts.push(`\nLifecycle: ${context.crmContext.lifecycleStage}`)
+    parts.push(`Sentiment: ${context.crmContext.sentiment}`)
+  }
+
+  // Scheduling context
+  if (context.schedulingContext) {
+    if (context.schedulingContext.nextAppointment) {
+      const apt = context.schedulingContext.nextAppointment
+      parts.push(`\nNext session: ${new Date(apt.startTime).toLocaleDateString()}`)
+    }
+    parts.push(`Total sessions: ${context.schedulingContext.sessionCount}`)
+  }
+
+  // Coach actions
+  if (context.coachActions && context.coachActions.length > 0) {
+    const completed = context.coachActions.filter((a: any) => a.completed).length
+    parts.push(`\nCoach actions: ${completed}/${context.coachActions.length} completed`)
+  }
+
+  return parts.join('\n')
+}
+
+/**
  * Generate next action recommendation
  *
  * @param openai - OpenAI client
@@ -147,9 +225,16 @@ async function generateNextAction(
   openai: OpenAI,
   data: ActionRequest
 ): Promise<ActionData> {
-  const systemPrompt = `You are an AI that determines the next best action for a user based on their current context.
+  // Fetch customer context from integration layer
+  const integrationManager = getIntegrationManager()
+  const customerContext = await integrationManager.getCustomerContext(data.customerId)
 
-Analyze the user's context and return a JSON object with the following structure:
+  // Build context string from customer data
+  const contextString = buildContextString(customerContext)
+
+  const systemPrompt = `You are an AI that determines the next best action for a Fearvana customer based on their Sacred Edge journey.
+
+Analyze the customer's context and return a JSON object with the following structure:
 {
   "id": "unique_action_id",
   "title": "Action Title",
@@ -163,26 +248,28 @@ Analyze the user's context and return a JSON object with the following structure
 
 Consider:
 - Current time of day and energy levels
-- What they've already completed today
-- Their schedule and commitments
-- Urgency vs importance
-- Building sustainable habits
-- Their current streaks and momentum
+- Their life area scores and trends
+- Their Spiral Dynamics level
+- Recent completed actions
+- Upcoming appointments
+- Building sustainable habits and momentum
+- Sacred Edge philosophy: push them beyond comfort zone
 
-User Context:
-${data.context}
+Customer Context:
+${contextString}
 
 Return only the JSON object, no additional text.`
 
   try {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4',
+      model: 'gpt-4o',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: 'What should I do next?' }
       ],
-      max_tokens: 200,
-      temperature: 0.3
+      max_tokens: 300,
+      temperature: 0.3,
+      response_format: { type: 'json_object' }
     })
 
     const response = completion.choices[0]?.message?.content || ''
@@ -219,7 +306,17 @@ Return only the JSON object, no additional text.`
       reasoning: z.string()
     })
 
-    return actionSchema.parse(actionData)
+    const validatedAction = actionSchema.parse(actionData)
+
+    // Log interaction to CRM
+    await integrationManager.logInteraction(data.customerId, {
+      type: 'system',
+      timestamp: new Date(),
+      summary: `Generated next action: ${validatedAction.title}`,
+      sentiment: 'neutral'
+    })
+
+    return validatedAction
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       throw new ValidationError('AI returned invalid action format', error.errors)
@@ -235,6 +332,8 @@ Return only the JSON object, no additional text.`
 
 /**
  * POST /api/ai-coach - Get AI coaching response
+ *
+ * Now uses Integration Manager to fetch customer context from multiple sources
  */
 export const POST = withMiddleware(
   async (request: NextRequest, context?: RouteContext) => {
@@ -251,8 +350,9 @@ export const POST = withMiddleware(
       {
         requestId: context?.requestId,
         meta: {
-          model: 'gpt-4',
-          tokensUsed: result.usage?.total_tokens
+          model: 'gpt-4o',
+          tokensUsed: result.usage?.total_tokens,
+          customerId: data.customerId
         }
       }
     )
@@ -265,6 +365,8 @@ export const POST = withMiddleware(
 
 /**
  * PUT /api/ai-coach - Generate personalized next action
+ *
+ * Now uses Integration Manager to fetch customer context from multiple sources
  */
 export const PUT = withMiddleware(
   async (request: NextRequest, context?: RouteContext) => {
@@ -278,8 +380,9 @@ export const PUT = withMiddleware(
       {
         requestId: context?.requestId,
         meta: {
-          model: 'gpt-4',
-          actionPriority: action.priority
+          model: 'gpt-4o',
+          actionPriority: action.priority,
+          customerId: data.customerId
         }
       }
     )
