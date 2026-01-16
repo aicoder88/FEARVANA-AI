@@ -1,0 +1,217 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ContentType {
+  VIDEO
+  AUDIO
+  DOCUMENT
+  TEXT
+}
+
+enum ProcessingStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum EntityType {
+  PERSON
+  PLACE
+  CONCEPT
+  ORGANIZATION
+  TOPIC
+}
+
+enum JobType {
+  TRANSCRIBE
+  EXTRACT_TEXT
+  GENERATE_EMBEDDINGS
+  EXTRACT_ENTITIES
+  GENERATE_TAGS
+}
+
+enum UserRole {
+  ADMIN
+  EDITOR
+  VIEWER
+  API_CLIENT
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole @default(VIEWER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  contentVersions ContentVersion[]
+
+  @@index([email])
+}
+
+model ContentItem {
+  id          String   @id @default(uuid())
+  type        ContentType
+  title       String
+  description String?
+
+  // File information
+  originalFileName String?
+  filePath         String?
+  fileSize         Int?
+  mimeType         String?
+  duration         Int?
+
+  // Processing
+  status             ProcessingStatus @default(PENDING)
+  processingProgress Int?             @default(0)
+  errorMessage       String?
+
+  // Content
+  transcript    String?
+  extractedText String?
+
+  // Metadata
+  author     String   @default("Akshay")
+  sourceType String
+  createdAt  DateTime @default(now())
+  uploadedAt DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Privacy
+  isPrivate         Boolean @default(false)
+  requiresRedaction Boolean @default(false)
+
+  // Relationships
+  tags       Tag[]
+  categories Category[]
+  entities   Entity[]
+  versions   ContentVersion[]
+  embeddings Embedding[]
+  jobs       ProcessingJob[]
+
+  @@index([status, type])
+  @@index([author, isPrivate])
+  @@index([createdAt])
+  @@index([type])
+  @@fulltext([title, description, transcript, extractedText])
+}
+
+model Tag {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  color     String?
+  createdAt DateTime @default(now())
+
+  contentItems ContentItem[]
+
+  @@index([name])
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  parentId  String?
+  createdAt DateTime @default(now())
+
+  parent   Category?     @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children Category[]    @relation("CategoryHierarchy")
+  contentItems ContentItem[]
+
+  @@index([slug])
+  @@index([parentId])
+}
+
+model Entity {
+  id               String     @id @default(uuid())
+  type             EntityType
+  name             String
+  description      String?
+  confidence       Float
+  contentItemId    String
+  occurrences      Int        @default(1)
+  firstMentionedAt String?
+
+  contentItem ContentItem @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+
+  @@index([contentItemId])
+  @@index([type, name])
+}
+
+model ContentVersion {
+  id              String   @id @default(uuid())
+  contentItemId   String
+  versionNumber   Int
+  changeDescription String?
+  changedFields   String[]
+  previousData    Json
+  createdAt       DateTime @default(now())
+  createdBy       String
+
+  contentItem ContentItem @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [createdBy], references: [id])
+
+  @@unique([contentItemId, versionNumber])
+  @@index([contentItemId])
+}
+
+model Embedding {
+  id             String   @id @default(uuid())
+  contentItemId  String
+  chunkIndex     Int
+  chunkText      String
+  chunkStart     Int?
+  chunkEnd       Int?
+  vectorId       String   @unique
+  embeddingModel String
+  createdAt      DateTime @default(now())
+
+  contentItem ContentItem @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+
+  @@unique([contentItemId, chunkIndex])
+  @@index([contentItemId])
+  @@index([vectorId])
+}
+
+model ProcessingJob {
+  id            String           @id @default(uuid())
+  contentItemId String
+  jobType       JobType
+  status        ProcessingStatus @default(PENDING)
+  priority      Int              @default(5)
+  attempts      Int              @default(0)
+  maxAttempts   Int              @default(3)
+  progress      Int              @default(0)
+  statusMessage String?
+  errorMessage  String?
+  startedAt     DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime         @default(now())
+
+  contentItem ContentItem @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+
+  @@index([status, priority])
+  @@index([contentItemId])
+  @@index([createdAt])
+}
+
+model SearchQuery {
+  id        String   @id @default(uuid())
+  query     String
+  filters   Json?
+  resultCount Int?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@fulltext([query])
+}
