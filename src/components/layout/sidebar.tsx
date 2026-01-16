@@ -20,6 +20,7 @@ import {
   Bell,
   HelpCircle,
   Brain,
+  LineChart,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -67,6 +68,12 @@ export function Sidebar({ className }: SidebarProps) {
       href: "/insights",
       icon: Brain,
       description: "Analytics & journaling",
+    },
+    {
+      title: "Business Analytics",
+      href: "/business-analytics",
+      icon: LineChart,
+      description: "AI-powered business insights",
     },
   ];
 
