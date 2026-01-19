@@ -39,13 +39,22 @@ export class EmailServiceFactory {
 
     switch (config.provider) {
       case 'sendgrid':
-        return require('../adapters/email/sendgrid').SendGridAdapter.getInstance()
+        throw new ConfigurationError(
+          'Email',
+          'SendGrid adapter not implemented yet. Use EMAIL_PROVIDER=mock for development.'
+        )
 
       case 'postmark':
-        return require('../adapters/email/postmark').PostmarkAdapter.getInstance()
+        throw new ConfigurationError(
+          'Email',
+          'Postmark adapter not implemented yet. Use EMAIL_PROVIDER=mock for development.'
+        )
 
       case 'aws-ses':
-        return require('../adapters/email/aws-ses').AWSSESAdapter.getInstance()
+        throw new ConfigurationError(
+          'Email',
+          'AWS SES adapter not implemented yet. Use EMAIL_PROVIDER=mock for development.'
+        )
 
       case 'mock':
         return require('../adapters/email/mock').MockEmailAdapter.getInstance()

@@ -338,8 +338,11 @@ export class ConfigService {
   }
 }
 
-// Validate configuration on module load in production
-if (ConfigService.isProduction) {
+// Skip validation during Next.js build phase
+const isNextBuild = process.env.NEXT_PHASE === 'phase-production-build'
+
+// Validate configuration on module load in production (but not during build)
+if (ConfigService.isProduction && !isNextBuild) {
   const errors = ConfigService.validate()
   if (errors.length > 0) {
     console.error('[Integration Config] Validation errors:', errors)

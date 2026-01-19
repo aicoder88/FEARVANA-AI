@@ -33,14 +33,22 @@ export class CRMServiceFactory {
 
     switch (config.provider) {
       case 'hubspot':
-        // Dynamic import to avoid loading unnecessary code
-        return require('../adapters/crm/hubspot').HubSpotCRMAdapter.getInstance()
+        throw new ConfigurationError(
+          'CRM',
+          'HubSpot adapter not implemented yet. Use CRM_PROVIDER=mock for development.'
+        )
 
       case 'salesforce':
-        return require('../adapters/crm/salesforce').SalesforceCRMAdapter.getInstance()
+        throw new ConfigurationError(
+          'CRM',
+          'Salesforce adapter not implemented yet. Use CRM_PROVIDER=mock for development.'
+        )
 
       case 'pipedrive':
-        return require('../adapters/crm/pipedrive').PipedriveCRMAdapter.getInstance()
+        throw new ConfigurationError(
+          'CRM',
+          'Pipedrive adapter not implemented yet. Use CRM_PROVIDER=mock for development.'
+        )
 
       case 'mock':
         return require('../adapters/crm/mock').MockCRMAdapter.getInstance()

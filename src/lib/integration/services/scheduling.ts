@@ -32,13 +32,22 @@ export class SchedulingServiceFactory {
 
     switch (config.provider) {
       case 'calendly':
-        return require('../adapters/scheduling/calendly').CalendlyAdapter.getInstance()
+        throw new ConfigurationError(
+          'Scheduling',
+          'Calendly adapter not implemented yet. Use SCHEDULING_PROVIDER=mock for development.'
+        )
 
       case 'acuity':
-        return require('../adapters/scheduling/acuity').AcuityAdapter.getInstance()
+        throw new ConfigurationError(
+          'Scheduling',
+          'Acuity adapter not implemented yet. Use SCHEDULING_PROVIDER=mock for development.'
+        )
 
       case 'google-calendar':
-        return require('../adapters/scheduling/google-calendar').GoogleCalendarAdapter.getInstance()
+        throw new ConfigurationError(
+          'Scheduling',
+          'Google Calendar adapter not implemented yet. Use SCHEDULING_PROVIDER=mock for development.'
+        )
 
       case 'mock':
         return require('../adapters/scheduling/mock').MockSchedulingAdapter.getInstance()
