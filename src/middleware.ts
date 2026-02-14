@@ -3,16 +3,6 @@ import { NextRequest, NextResponse } from 'next/server'
 // Rate limiting store (in production, use Redis)
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>()
 
-// Clean up old entries periodically
-setInterval(() => {
-  const now = Date.now()
-  for (const [key, value] of rateLimitStore.entries()) {
-    if (value.resetTime < now) {
-      rateLimitStore.delete(key)
-    }
-  }
-}, 60000) // Clean up every minute
-
 /**
  * Rate limiting configuration per endpoint type
  */
@@ -139,141 +129,89 @@ function isAllowedOrigin(origin: string | null): boolean {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Add security headers to all responses
-  const response = NextResponse.next()
+  // This middleware is intentionally scoped to only API routes via config.matcher.
+  // Keeping it off normal page requests is the biggest Edge-request reduction lever.
 
-  // Security headers
-  response.headers.set('X-DNS-Prefetch-Control', 'on')
-  response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload')
-  response.headers.set('X-Frame-Options', 'SAMEORIGIN')
-  response.headers.set('X-Content-Type-Options', 'nosniff')
-  response.headers.set('X-XSS-Protection', '1; mode=block')
-  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
-  response.headers.set(
-    'Permissions-Policy',
-    'camera=(), microphone=(), geolocation=(), interest-cohort=()'
-  )
+  // Get client IP for rate limiting
+  const ip =
+    request.headers.get('x-forwarded-for') ||
+    request.headers.get('x-real-ip') ||
+    'unknown'
 
-  // Content Security Policy
-  response.headers.set(
-    'Content-Security-Policy',
-    [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // TODO: Remove unsafe-inline in production
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: https:",
-      "font-src 'self' data:",
-      "connect-src 'self' https://api.openai.com https://*.supabase.co",
-      "frame-ancestors 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-    ].join('; ')
-  )
+  // Check rate limit
+  const { allowed, remaining, resetTime } = checkRateLimit(ip, pathname)
 
-  // Skip middleware for public routes
-  if (
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/static') ||
-    pathname.includes('/public') ||
-    pathname === '/auth/login' ||
-    pathname === '/auth/register' ||
-    pathname === '/landing' ||
-    pathname === '/'
-  ) {
-    return response
+  if (!allowed) {
+    return NextResponse.json(
+      {
+        error: 'Too many requests. Please try again later.',
+        retryAfter: Math.ceil((resetTime - Date.now()) / 1000),
+      },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': Math.ceil((resetTime - Date.now()) / 1000).toString(),
+          'X-RateLimit-Limit': '100',
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': new Date(resetTime).toISOString(),
+        },
+      }
+    )
   }
 
-  // API routes protection
-  if (pathname.startsWith('/api/')) {
-    // Get client IP for rate limiting
-    const ip = request.headers.get('x-forwarded-for') ||
-               request.headers.get('x-real-ip') ||
-               'unknown'
-
-    // Check rate limit
-    const { allowed, remaining, resetTime } = checkRateLimit(ip, pathname)
-
-    if (!allowed) {
-      return NextResponse.json(
-        {
-          error: 'Too many requests. Please try again later.',
-          retryAfter: Math.ceil((resetTime - Date.now()) / 1000)
-        },
-        {
-          status: 429,
-          headers: {
-            'Retry-After': Math.ceil((resetTime - Date.now()) / 1000).toString(),
-            'X-RateLimit-Limit': '100',
-            'X-RateLimit-Remaining': '0',
-            'X-RateLimit-Reset': new Date(resetTime).toISOString(),
-          }
-        }
-      )
-    }
-
-    // Add rate limit headers to response
-    response.headers.set('X-RateLimit-Remaining', remaining.toString())
-    response.headers.set('X-RateLimit-Reset', new Date(resetTime).toISOString())
-
-    // CORS check
-    const origin = request.headers.get('origin')
-    if (origin && !isAllowedOrigin(origin)) {
-      return NextResponse.json(
-        { error: 'CORS policy violation' },
-        { status: 403 }
-      )
-    }
-
-    // CSRF check for state-changing operations
-    if (!verifyCsrfToken(request)) {
-      return NextResponse.json(
-        { error: 'CSRF token validation failed' },
-        { status: 403 }
-      )
-    }
-
-    // Protected API routes require authentication
-    const protectedRoutes = [
-      '/api/ai-coach',
-      '/api/antarctica-ai',
-      '/api/payments',
-      '/api/subscriptions',
-      '/api/corporate-programs',
-    ]
-
-    const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
-
-    if (isProtectedRoute) {
-      const authHeader = request.headers.get('Authorization')
-
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return NextResponse.json(
-          { error: 'Authentication required. Please provide a valid Bearer token.' },
-          { status: 401 }
-        )
-      }
-
-      const token = authHeader.substring(7)
-      const { valid, userId } = verifyAuthToken(token)
-
-      if (!valid) {
-        return NextResponse.json(
-          { error: 'Invalid or expired authentication token.' },
-          { status: 401 }
-        )
-      }
-
-      // Add userId to request headers for use in API routes
-      const requestHeaders = new Headers(request.headers)
-      requestHeaders.set('x-user-id', userId || '')
-
-      return NextResponse.next({
-        request: {
-          headers: requestHeaders,
-        },
-      })
-    }
+  // CORS check
+  const origin = request.headers.get('origin')
+  if (origin && !isAllowedOrigin(origin)) {
+    return NextResponse.json({ error: 'CORS policy violation' }, { status: 403 })
   }
+
+  // CSRF check for state-changing operations
+  if (!verifyCsrfToken(request)) {
+    return NextResponse.json({ error: 'CSRF token validation failed' }, { status: 403 })
+  }
+
+  // Protected API routes require authentication
+  const protectedRoutes = [
+    '/api/ai-coach',
+    '/api/antarctica-ai',
+    '/api/payments',
+    '/api/subscriptions',
+    '/api/corporate-programs',
+  ]
+
+  const requestHeaders = new Headers(request.headers)
+  const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
+
+  if (isProtectedRoute) {
+    const authHeader = request.headers.get('Authorization')
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { error: 'Authentication required. Please provide a valid Bearer token.' },
+        { status: 401 }
+      )
+    }
+
+    const token = authHeader.substring(7)
+    const { valid, userId } = verifyAuthToken(token)
+
+    if (!valid) {
+      return NextResponse.json({ error: 'Invalid or expired authentication token.' }, { status: 401 })
+    }
+
+    // Add userId to request headers for use in API routes
+    requestHeaders.set('x-user-id', userId || '')
+  }
+
+  const response = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  })
+
+  // Add rate limit headers to response
+  response.headers.set('X-RateLimit-Remaining', remaining.toString())
+  response.headers.set('X-RateLimit-Reset', new Date(resetTime).toISOString())
 
   return response
 }
@@ -283,12 +221,6 @@ export async function middleware(request: NextRequest) {
  */
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    '/api/:path*',
   ],
 }
