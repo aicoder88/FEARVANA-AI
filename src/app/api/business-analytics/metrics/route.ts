@@ -7,7 +7,7 @@ import type { AICoachingProduct } from '@/app/api/products/route'
 // Mock data - in production, fetch from database
 import { AKSHAY_AI_PRODUCTS } from '@/app/api/products/route'
 
-const MOCK_SUBSCRIPTIONS: Subscription[] = [
+export const MOCK_SUBSCRIPTIONS: Subscription[] = [
   {
     id: 'sub_001',
     userId: 'user_001',

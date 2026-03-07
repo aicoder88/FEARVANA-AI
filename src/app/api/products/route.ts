@@ -16,7 +16,7 @@ export type AICoachingProduct = {
   status: 'active' | 'coming_soon'
 }
 
-const AKSHAY_AI_PRODUCTS: AICoachingProduct[] = [
+export const AKSHAY_AI_PRODUCTS: AICoachingProduct[] = [
   {
     id: 'fearvana-ai-coach',
     name: 'Fearvana AI Coach',
