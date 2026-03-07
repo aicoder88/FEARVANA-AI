@@ -13,9 +13,10 @@ import { getRequestId } from './response'
 /**
  * Route handler type
  */
-export type RouteHandler = (
+export type RouteHandler = (request: NextRequest) => Promise<NextResponse>
+export type MiddlewareHandler = (
   request: NextRequest,
-  context?: RouteContext
+  context: RouteContext
 ) => Promise<NextResponse>
 
 /**
@@ -78,7 +79,7 @@ function composeMiddleware(middlewares: Middleware[]): Middleware {
  * )
  */
 export function withMiddleware(
-  handler: RouteHandler,
+  handler: MiddlewareHandler,
   middlewares: Middleware[] = []
 ): RouteHandler {
   const composedMiddleware = composeMiddleware(middlewares)

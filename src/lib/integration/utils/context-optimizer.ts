@@ -152,7 +152,7 @@ export function optimizeContext(
 
   // Step 6: Remove data freshness metadata
   if (optimized.dataFreshness) {
-    delete optimized.dataFreshness
+    optimized.dataFreshness = undefined
     truncatedFields.push('dataFreshness')
     currentTokenCount = countTokens(optimized)
   }

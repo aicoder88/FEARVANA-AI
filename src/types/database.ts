@@ -142,6 +142,44 @@ export interface Database {
           updated_at?: string
         }
       }
+      daily_tasks: {
+        Row: {
+          id: string
+          profile_id: string
+          level_id: string | null
+          title: string
+          description: string | null
+          points: number
+          completed: boolean
+          due_date: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          level_id?: string | null
+          title: string
+          description?: string | null
+          points?: number
+          completed?: boolean
+          due_date?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          profile_id?: string
+          level_id?: string | null
+          title?: string
+          description?: string | null
+          points?: number
+          completed?: boolean
+          due_date?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
       spiral_journey_states: {
         Row: {
           id: string

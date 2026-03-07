@@ -14,7 +14,7 @@ interface RateLimitEntry {
 const rateLimitStore = new Map<string, RateLimitEntry>()
 
 // Clean up expired entries periodically
-setInterval(() => {
+const cleanupInterval = setInterval(() => {
   const now = Date.now()
   for (const [key, entry] of rateLimitStore.entries()) {
     if (now > entry.resetTime) {
@@ -22,6 +22,7 @@ setInterval(() => {
     }
   }
 }, 60000) // Clean up every minute
+cleanupInterval.unref?.()
 
 export function getClientIdentifier(request: NextRequest): string {
   // Try to get real IP from various headers (for reverse proxies)

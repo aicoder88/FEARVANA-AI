@@ -16,7 +16,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
  * @returns Typed Supabase client
  */
 export function createClient() {
-  return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey)
+  return createBrowserClient<Database>(supabaseUrl!, supabaseAnonKey!) as any
 }
 
 /**
@@ -26,12 +26,14 @@ export function createClient() {
 export async function createServerSupabaseClient() {
   const cookieStore = await cookies()
 
-  return createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
+  return createServerClient<Database>(supabaseUrl!, supabaseAnonKey!, {
     cookies: {
       getAll() {
         return cookieStore.getAll()
       },
-      setAll(cookiesToSet) {
+      setAll(
+        cookiesToSet: Array<{ name: string; value: string; options?: Record<string, unknown> }>
+      ) {
         try {
           cookiesToSet.forEach(({ name, value, options }) =>
             cookieStore.set(name, value, options)
@@ -43,14 +45,14 @@ export async function createServerSupabaseClient() {
         }
       },
     },
-  })
+  }) as any
 }
 
 /**
  * Type-safe client with helper methods
  */
 export class TypedSupabaseClient {
-  constructor(private client: ReturnType<typeof createClient>) {}
+  constructor(private client: any) {}
 
   /**
    * Get current authenticated user

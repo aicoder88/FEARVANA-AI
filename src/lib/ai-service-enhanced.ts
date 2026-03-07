@@ -195,8 +195,7 @@ export class EnhancedAIService {
 
     if (this.openaiApiKey) {
       this.openaiClient = new OpenAI({
-        apiKey: this.openaiApiKey,
-        dangerouslyAllowAPIKey: false // Server-side only
+        apiKey: this.openaiApiKey
       })
     }
   }

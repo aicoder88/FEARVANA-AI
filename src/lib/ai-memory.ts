@@ -190,7 +190,23 @@ class AIMemoryService {
         const contextString = this.getAIContext()
         const aiAction = await openaiService.generatePersonalizedAction(contextString)
         if (aiAction && aiAction.id) {
-          return aiAction
+          return {
+            id: aiAction.id,
+            title: aiAction.title,
+            description: aiAction.description,
+            type: 'important',
+            estimatedTime: `${aiAction.estimatedTime} min`,
+            category: aiAction.category,
+            priority:
+              aiAction.priority === 'critical'
+                ? 5
+                : aiAction.priority === 'high'
+                  ? 4
+                  : aiAction.priority === 'medium'
+                    ? 3
+                    : 2,
+            reasoning: aiAction.reasoning,
+          }
         }
       } catch (error) {
         console.warn('Failed to get AI-generated action, falling back to rule-based logic:', error)

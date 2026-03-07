@@ -83,6 +83,7 @@ export class AkshayCoachingService {
 
       // 7. Save conversation
       await this.memoryManager.saveConversation(request.userId, {
+        userId: request.userId,
         role: 'user',
         content: request.message,
         timestamp: new Date(),
@@ -91,6 +92,7 @@ export class AkshayCoachingService {
       })
 
       await this.memoryManager.saveConversation(request.userId, {
+        userId: request.userId,
         role: 'assistant',
         content: aiResponse.content,
         timestamp: new Date(),
@@ -173,6 +175,7 @@ export class AkshayCoachingService {
 
     // Save conversation after streaming completes
     await this.memoryManager.saveConversation(request.userId, {
+      userId: request.userId,
       role: 'user',
       content: request.message,
       timestamp: new Date(),
@@ -181,6 +184,7 @@ export class AkshayCoachingService {
     })
 
     await this.memoryManager.saveConversation(request.userId, {
+      userId: request.userId,
       role: 'assistant',
       content: fullResponse,
       timestamp: new Date(),

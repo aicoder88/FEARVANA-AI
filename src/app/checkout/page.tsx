@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { CheckCircle, CreditCard, Shield, ArrowLeft, Loader2 } from 'lucide-react'
-import { AICoachingProduct } from '../api/products/route'
+import type { AICoachingProduct } from '@/lib/mock/products'
 
 const MOCK_PRODUCT: AICoachingProduct = {
   id: 'fearvana-ai-coach',
@@ -74,12 +74,16 @@ function CheckoutPageContent() {
     return 0
   }
 
-  const handleInputChange = (field: string, value: string, nested?: string) => {
-    if (nested) {
+  const handleInputChange = (
+    field: string,
+    value: string,
+    nested?: 'billingAddress'
+  ) => {
+    if (nested === 'billingAddress') {
       setFormData(prev => ({
         ...prev,
-        [nested]: {
-          ...prev[nested as keyof typeof prev.billingAddress],
+        billingAddress: {
+          ...prev.billingAddress,
           [field]: value
         }
       }))
@@ -226,7 +230,10 @@ function CheckoutPageContent() {
                   <CardTitle className="text-white">Billing Cycle</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <RadioGroup value={billingCycle} onValueChange={setBillingCycle}>
+                  <RadioGroup
+                    value={billingCycle}
+                    onValueChange={(value) => setBillingCycle(value as 'monthly' | 'annual')}
+                  >
                     <div className="space-y-3">
                       <div className="flex items-center space-x-2 p-4 border border-slate-600 rounded-lg hover:border-orange-400 cursor-pointer">
                         <RadioGroupItem value="monthly" id="monthly" />

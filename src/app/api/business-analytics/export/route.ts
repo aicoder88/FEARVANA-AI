@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { calculateMetrics, aggregateRevenue } from '@/lib/services/analytics-service'
 import type { ExportResponse, ExportFormat } from '@/types/business-analytics'
-import { AKSHAY_AI_PRODUCTS } from '@/app/api/products/route'
-import { MOCK_SUBSCRIPTIONS } from '../metrics/route'
+import { AKSHAY_AI_PRODUCTS } from '@/lib/mock/products'
+import { MOCK_SUBSCRIPTIONS } from '@/lib/mock/subscriptions'
 
 export async function POST(request: NextRequest) {
   try {

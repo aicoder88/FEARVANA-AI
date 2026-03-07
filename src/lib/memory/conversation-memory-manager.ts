@@ -18,8 +18,7 @@ import type {
   AkshayConversationRow,
   UserSacredEdgeRow,
   UserPatternRow,
-  UserCommitmentRow,
-  MemoryError
+  UserCommitmentRow
 } from '@/types/akshay-coaching'
 
 // ============================================================================

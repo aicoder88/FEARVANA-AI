@@ -261,7 +261,7 @@ export function EmptyState({
       {icon && (
         <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
           {React.isValidElement(icon)
-            ? React.cloneElement(icon as React.ReactElement, {
+            ? React.cloneElement(icon as React.ReactElement<{ className?: string }>, {
                 className: "w-8 h-8 text-muted-foreground"
               })
             : icon

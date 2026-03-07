@@ -73,7 +73,7 @@ export function PageHeader({
                 )}
               >
                 {React.isValidElement(icon)
-                  ? React.cloneElement(icon as React.ReactElement, {
+                  ? React.cloneElement(icon as React.ReactElement<{ className?: string }>, {
                       className: "w-6 h-6 text-white"
                     })
                   : icon

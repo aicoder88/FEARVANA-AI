@@ -229,12 +229,12 @@ export const getTaskStats = withErrorHandling(
 
     if (error) throw error
 
-    const tasks = data || []
+    const tasks = (data || []) as Array<{ completed: boolean; due_date: string; points: number | null }>
     const completed = tasks.filter((t) => t.completed).length
     const total = tasks.length
     const totalPoints = tasks
       .filter((t) => t.completed)
-      .reduce((sum, t) => sum + (t.points || 0), 0)
+      .reduce((sum: number, t) => sum + (t.points || 0), 0)
 
     return {
       completed,

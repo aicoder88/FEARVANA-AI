@@ -26,12 +26,18 @@
       "@/config/*": ["./src/config/*"],
       "@/constants/*": ["./src/constants/*"],
       "@/utils/*": ["./src/lib/utils/*"],
-      "@/hooks/*": ["./src/lib/hooks/*"],
+      "@/hooks/*": ["./src/hooks/*", "./src/lib/hooks/*"],
       "@/types/*": ["./src/types/*"],
       "@/services/*": ["./src/lib/services/*"],
       "@/features/*": ["./src/features/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "jest.setup.ts",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["node_modules", "packages", "coverage"]
 }

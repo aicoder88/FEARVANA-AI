@@ -65,7 +65,8 @@ function cleanupExpiredEntries(): void {
 
 // Run cleanup every minute
 if (typeof setInterval !== 'undefined') {
-  setInterval(cleanupExpiredEntries, 60000)
+  const cleanupInterval = setInterval(cleanupExpiredEntries, 60000)
+  cleanupInterval.unref?.()
 }
 
 /**

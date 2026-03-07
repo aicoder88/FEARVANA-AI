@@ -1,24 +1,16 @@
 'use client'
 
 import { memo, useMemo } from 'react'
-import dynamic from 'next/dynamic'
 import { LIFE_LEVEL_CATEGORIES } from '@/lib/constants'
 import { LifeLevelCategory } from '@/lib/database.types'
-
-// Lazy load Recharts with proper loading state
-const Radar = dynamic(() => import('recharts').then(mod => ({ default: mod.Radar })), { ssr: false })
-const RadarChart = dynamic(() => import('recharts').then(mod => ({ default: mod.RadarChart })), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-      Loading radar chart...
-    </div>
-  )
-})
-const PolarGrid = dynamic(() => import('recharts').then(mod => ({ default: mod.PolarGrid })), { ssr: false })
-const PolarAngleAxis = dynamic(() => import('recharts').then(mod => ({ default: mod.PolarAngleAxis })), { ssr: false })
-const PolarRadiusAxis = dynamic(() => import('recharts').then(mod => ({ default: mod.PolarRadiusAxis })), { ssr: false })
-const ResponsiveContainer = dynamic(() => import('recharts').then(mod => ({ default: mod.ResponsiveContainer })), { ssr: false })
+import {
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis,
+  Radar,
+  RadarChart,
+  ResponsiveContainer,
+} from 'recharts'
 
 interface RadarChartData {
   category: LifeLevelCategory

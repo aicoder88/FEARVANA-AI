@@ -2,28 +2,23 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { MainLayout } from '@/components/layout/main-layout'
-import dynamic from 'next/dynamic'
 import { useMemo, memo } from 'react'
 import { LIFE_LEVEL_CATEGORIES } from '@/lib/constants'
 import { TrendingUp, Calendar, Target, Award, Zap } from 'lucide-react'
-
-// Lazy load Recharts components with loading states
-const LineChart = dynamic(() => import('recharts').then(mod => ({ default: mod.LineChart })), {
-  ssr: false,
-  loading: () => <div className="h-80 flex items-center justify-center text-muted-foreground">Loading chart...</div>
-})
-
-const Line = dynamic(() => import('recharts').then(mod => ({ default: mod.Line })), { ssr: false })
-const AreaChart = dynamic(() => import('recharts').then(mod => ({ default: mod.AreaChart })), { ssr: false })
-const Area = dynamic(() => import('recharts').then(mod => ({ default: mod.Area })), { ssr: false })
-const XAxis = dynamic(() => import('recharts').then(mod => ({ default: mod.XAxis })), { ssr: false })
-const YAxis = dynamic(() => import('recharts').then(mod => ({ default: mod.YAxis })), { ssr: false })
-const CartesianGrid = dynamic(() => import('recharts').then(mod => ({ default: mod.CartesianGrid })), { ssr: false })
-const Tooltip = dynamic(() => import('recharts').then(mod => ({ default: mod.Tooltip })), { ssr: false })
-const ResponsiveContainer = dynamic(() => import('recharts').then(mod => ({ default: mod.ResponsiveContainer })), { ssr: false })
-const PieChart = dynamic(() => import('recharts').then(mod => ({ default: mod.PieChart })), { ssr: false })
-const Pie = dynamic(() => import('recharts').then(mod => ({ default: mod.Pie })), { ssr: false })
-const Cell = dynamic(() => import('recharts').then(mod => ({ default: mod.Cell })), { ssr: false })
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  Cell,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
 
 // Memoized metric card component
 const MetricCard = memo(({

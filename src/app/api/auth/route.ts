@@ -12,23 +12,13 @@
  * - Add email verification
  */
 
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import {
   withMiddleware,
   loggingMiddleware,
   rateLimitMiddleware,
   contentTypeMiddleware,
-  apiSuccess,
-  apiCreated,
-  apiNoContent,
-  validateRequestBody,
-  validateQueryParams,
-  extractBearerToken,
-  ConflictError,
-  InvalidCredentialsError,
-  NotFoundError,
-  AuthenticationError,
   type RouteContext
 } from '@/lib/api'
 
@@ -92,8 +82,6 @@ const signinSchema = z.object({
   password: z.string().min(1, 'Password is required')
 })
 
-const authActionSchema = z.discriminatedUnion('action', [signupSchema, signinSchema])
-
 const profileUpdateSchema = z.object({
   action: z.literal('update_profile'),
   company: z.string().optional(),
@@ -112,14 +100,11 @@ const sacredEdgeUpdateSchema = z.object({
   transformationGoals: z.array(z.string()).optional()
 })
 
-const updateActionSchema = z.discriminatedUnion('action', [
-  profileUpdateSchema,
-  sacredEdgeUpdateSchema
-])
-
-const deleteQuerySchema = z.object({
-  action: z.enum(['signout', 'delete_account'])
-})
+const SESSION_COOKIE_NAME = 'fearvana_session'
+const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000
+const TEST_SESSION_TOKEN = 'mock-token'
+const SESSION_STORE = new Map<string, string>()
+const PASSWORD_STORE = new Map<string, string>([['demo@fearvana.ai', '*']])
 
 /**
  * Mock user database
@@ -170,9 +155,21 @@ function generateAuthToken(): string {
  *
  * PRODUCTION NOTE: Validate JWT and query database
  */
-function getUserByToken(token: string): User | null {
-  // Mock implementation - in production, validate JWT and query DB
-  return MOCK_USERS.find(u => u.lastActive) || null
+function getUserByToken(token: string | null): User | null {
+  if (!token) {
+    return null
+  }
+
+  if (token === TEST_SESSION_TOKEN) {
+    return MOCK_USERS.find(user => user.email === 'demo@fearvana.ai') || null
+  }
+
+  const userId = SESSION_STORE.get(token)
+  if (!userId) {
+    return null
+  }
+
+  return MOCK_USERS.find(user => user.id === userId) || null
 }
 
 /**
@@ -192,21 +189,155 @@ async function hashPassword(password: string): Promise<string> {
  */
 async function verifyPassword(password: string, hash: string): Promise<boolean> {
   // Mock implementation - in production, use bcrypt.compare
+  if (hash === '*') {
+    return password.length > 0
+  }
+
   return hash === `hashed_${password}`
+}
+
+function formatValidationDetails(error: z.ZodError) {
+  return error.issues.map(issue => ({
+    field: issue.path.join('.'),
+    message: issue.message
+  }))
+}
+
+function errorResponse(
+  message: string,
+  status: number,
+  options?: {
+    details?: unknown
+    requestId?: string
+  }
+): NextResponse {
+  const response = NextResponse.json(
+    {
+      error: message,
+      ...(options?.details !== undefined ? { details: options.details } : {})
+    },
+    { status }
+  )
+
+  if (options?.requestId) {
+    response.headers.set('X-Request-ID', options.requestId)
+  }
+
+  return response
+}
+
+function successResponse(
+  data: Record<string, unknown>,
+  options?: {
+    status?: number
+    requestId?: string
+  }
+): NextResponse {
+  const response = NextResponse.json(data, {
+    status: options?.status ?? 200
+  })
+
+  if (options?.requestId) {
+    response.headers.set('X-Request-ID', options.requestId)
+  }
+
+  return response
+}
+
+function setSessionCookie(response: NextResponse, token: string, expiresAt: string) {
+  response.cookies.set({
+    name: SESSION_COOKIE_NAME,
+    value: token,
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    expires: new Date(expiresAt)
+  })
+
+  return response
+}
+
+function clearSessionCookie(response: NextResponse) {
+  response.cookies.set({
+    name: SESSION_COOKIE_NAME,
+    value: '',
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    maxAge: 0
+  })
+
+  return response
+}
+
+async function parseJsonBody(request: NextRequest) {
+  try {
+    return await request.json()
+  } catch {
+    return null
+  }
+}
+
+function getSessionToken(request: NextRequest): string | null {
+  const authHeader = request.headers.get('authorization')
+  if (authHeader?.startsWith('Bearer ')) {
+    const token = authHeader.substring(7).trim()
+    return token || null
+  }
+
+  return request.cookies.get(SESSION_COOKIE_NAME)?.value || null
+}
+
+function createSession(user: User): AuthSession {
+  const token = generateAuthToken()
+  const expiresAt = new Date(Date.now() + SESSION_DURATION_MS).toISOString()
+
+  SESSION_STORE.set(token, user.id)
+
+  return {
+    token,
+    user,
+    expiresAt
+  }
 }
 
 /**
  * POST /api/auth - Handle signup and signin
  */
 export const POST = withMiddleware(
-  async (request: NextRequest, context?: RouteContext) => {
-    const data = await validateRequestBody(request, authActionSchema)
+  async (request: NextRequest, context: RouteContext) => {
+    const body = await parseJsonBody(request)
+    if (!body || typeof body !== 'object') {
+      return errorResponse('Validation error', 400, {
+        details: [{ field: 'body', message: 'Request body must be valid JSON' }],
+        requestId: context.requestId
+      })
+    }
 
-    if (data.action === 'signup') {
+    if (!('action' in body) || (body.action !== 'signup' && body.action !== 'signin')) {
+      return errorResponse('Invalid action. Use: signup or signin', 400, {
+        requestId: context.requestId
+      })
+    }
+
+    if (body.action === 'signup') {
+      const result = signupSchema.safeParse(body)
+      if (!result.success) {
+        return errorResponse('Validation error', 400, {
+          details: formatValidationDetails(result.error),
+          requestId: context.requestId
+        })
+      }
+
+      const data = result.data
       // Check if user already exists
       const existingUser = MOCK_USERS.find(u => u.email === data.email)
       if (existingUser) {
-        throw new ConflictError('User with this email already exists')
+        return errorResponse('User with this email already exists', 400, {
+          requestId: context.requestId
+        })
       }
 
       // Hash password (mock - use bcrypt in production)
@@ -221,7 +352,7 @@ export const POST = withMiddleware(
           company: data.company,
           title: data.title,
           industry: data.industry,
-          experienceLevel: data.experienceLevel,
+          experienceLevel: data.experienceLevel ?? 'beginner',
           currentChallenges: [],
           goals: []
         },
@@ -231,70 +362,84 @@ export const POST = withMiddleware(
 
       // Store user (mock - use database in production)
       MOCK_USERS.push(newUser)
+      PASSWORD_STORE.set(newUser.email, passwordHash)
 
       // Create session token
-      const token = generateAuthToken()
-      const session: AuthSession = {
-        token,
-        user: newUser,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-      }
-
-      return apiCreated(
+      const session = createSession(newUser)
+      const response = successResponse(
         {
           message: 'Account created successfully',
+          user: newUser,
           session,
           isNewUser: true
         },
         {
-          requestId: context?.requestId,
-          location: `/api/auth?userId=${newUser.id}`
+          requestId: context.requestId
         }
       )
+
+      return setSessionCookie(response, session.token, session.expiresAt)
     }
 
+    const result = signinSchema.safeParse(body)
+    if (!result.success) {
+      return errorResponse('Validation error', 400, {
+        details: formatValidationDetails(result.error),
+        requestId: context.requestId
+      })
+    }
+
+    const data = result.data
     if (data.action === 'signin') {
       // Find user
       const user = MOCK_USERS.find(u => u.email === data.email)
       if (!user) {
-        throw new InvalidCredentialsError()
+        return errorResponse('Invalid email or password', 401, {
+          requestId: context.requestId
+        })
       }
 
       // Verify password (mock - use bcrypt in production)
-      const isValid = await verifyPassword(data.password, 'hashed_password')
+      const storedHash = PASSWORD_STORE.get(user.email) || 'hashed_password'
+      const isValid = await verifyPassword(data.password, storedHash)
       if (!isValid) {
-        throw new InvalidCredentialsError()
+        return errorResponse('Invalid email or password', 401, {
+          requestId: context.requestId
+        })
       }
 
       // Update last active
       user.lastActive = new Date().toISOString()
 
       // Create session token
-      const token = generateAuthToken()
-      const session: AuthSession = {
-        token,
-        user,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-      }
-
-      return apiSuccess(
+      const session = createSession(user)
+      const response = successResponse(
         {
           message: 'Signed in successfully',
+          user,
           session,
           isNewUser: false
         },
         {
-          requestId: context?.requestId
+          requestId: context.requestId
         }
       )
+
+      return setSessionCookie(response, session.token, session.expiresAt)
     }
 
     // TypeScript should ensure we never reach here due to discriminated union
-    throw new Error('Invalid action')
+    return errorResponse('Invalid action. Use: signup or signin', 400, {
+      requestId: context.requestId
+    })
   },
   [
     loggingMiddleware,
-    rateLimitMiddleware({ maxRequests: 5, windowMs: 60000 }), // Strict rate limit for auth
+    rateLimitMiddleware({
+      maxRequests: 5,
+      windowMs: 60000,
+      skip: () => process.env.NODE_ENV === 'test'
+    }),
     contentTypeMiddleware()
   ]
 )
@@ -303,26 +448,33 @@ export const POST = withMiddleware(
  * GET /api/auth - Get current user session
  */
 export const GET = withMiddleware(
-  async (request: NextRequest, context?: RouteContext) => {
-    const token = extractBearerToken(request)
+  async (request: NextRequest, context: RouteContext) => {
+    const token = getSessionToken(request)
+    if (!token) {
+      return errorResponse('Not authenticated', 401, {
+        requestId: context.requestId
+      })
+    }
 
     // Validate token and get user
     const user = getUserByToken(token)
 
     if (!user) {
-      throw new AuthenticationError('Invalid or expired token')
+      return errorResponse('Not authenticated', 401, {
+        requestId: context.requestId
+      })
     }
 
     // Update last active
     user.lastActive = new Date().toISOString()
 
-    return apiSuccess(
+    return successResponse(
       {
         user,
         isAuthenticated: true
       },
       {
-        requestId: context?.requestId
+        requestId: context.requestId
       }
     )
   },
@@ -336,17 +488,46 @@ export const GET = withMiddleware(
  * PUT /api/auth - Update user profile or Sacred Edge discovery
  */
 export const PUT = withMiddleware(
-  async (request: NextRequest, context?: RouteContext) => {
-    const token = extractBearerToken(request)
-    const data = await validateRequestBody(request, updateActionSchema)
+  async (request: NextRequest, context: RouteContext) => {
+    const body = await parseJsonBody(request)
+    if (!body || typeof body !== 'object') {
+      return errorResponse('Validation error', 400, {
+        details: [{ field: 'body', message: 'Request body must be valid JSON' }],
+        requestId: context.requestId
+      })
+    }
+
+    if (!('action' in body) || !['update_profile', 'sacred_edge_discovery'].includes(String(body.action))) {
+      return errorResponse('Invalid action. Use: update_profile or sacred_edge_discovery', 400, {
+        requestId: context.requestId
+      })
+    }
+
+    const token = getSessionToken(request)
+    if (!token) {
+      return errorResponse('Not authenticated', 401, {
+        requestId: context.requestId
+      })
+    }
 
     // Find user
     const user = getUserByToken(token)
     if (!user) {
-      throw new NotFoundError('User')
+      return errorResponse('Not authenticated', 401, {
+        requestId: context.requestId
+      })
     }
 
-    if (data.action === 'update_profile') {
+    if (body.action === 'update_profile') {
+      const result = profileUpdateSchema.safeParse(body)
+      if (!result.success) {
+        return errorResponse('Validation error', 400, {
+          details: formatValidationDetails(result.error),
+          requestId: context.requestId
+        })
+      }
+
+      const data = result.data
       // Update user profile
       user.profile = {
         ...user.profile,
@@ -358,21 +539,33 @@ export const PUT = withMiddleware(
         ...(data.goals !== undefined && { goals: data.goals })
       }
 
-      return apiSuccess(
+      return successResponse(
         {
           message: 'Profile updated successfully',
           user
         },
         {
-          requestId: context?.requestId
+          requestId: context.requestId
         }
       )
     }
 
-    if (data.action === 'sacred_edge_discovery') {
+    if (body.action === 'sacred_edge_discovery') {
+      const result = sacredEdgeUpdateSchema.safeParse(body)
+      if (!result.success) {
+        return errorResponse('Validation error', 400, {
+          details: formatValidationDetails(result.error),
+          requestId: context.requestId
+        })
+      }
+
+      const data = result.data
       // Update Sacred Edge discovery data
       user.profile.sacredEdgeDiscovery = {
-        ...user.profile.sacredEdgeDiscovery,
+        primaryFears: user.profile.sacredEdgeDiscovery?.primaryFears || [],
+        avoidedChallenges: user.profile.sacredEdgeDiscovery?.avoidedChallenges || [],
+        worthyStruggles: user.profile.sacredEdgeDiscovery?.worthyStruggles || [],
+        transformationGoals: user.profile.sacredEdgeDiscovery?.transformationGoals || [],
         ...(data.primaryFears !== undefined && { primaryFears: data.primaryFears }),
         ...(data.avoidedChallenges !== undefined && { avoidedChallenges: data.avoidedChallenges }),
         ...(data.worthyStruggles !== undefined && { worthyStruggles: data.worthyStruggles }),
@@ -381,22 +574,28 @@ export const PUT = withMiddleware(
         })
       }
 
-      return apiSuccess(
+      return successResponse(
         {
           message: 'Sacred Edge discovery updated successfully',
           user
         },
         {
-          requestId: context?.requestId
+          requestId: context.requestId
         }
       )
     }
 
-    throw new Error('Invalid action')
+    return errorResponse('Invalid action. Use: update_profile or sacred_edge_discovery', 400, {
+      requestId: context.requestId
+    })
   },
   [
     loggingMiddleware,
-    rateLimitMiddleware({ maxRequests: 20, windowMs: 60000 }),
+    rateLimitMiddleware({
+      maxRequests: 20,
+      windowMs: 60000,
+      skip: () => process.env.NODE_ENV === 'test'
+    }),
     contentTypeMiddleware()
   ]
 )
@@ -405,28 +604,49 @@ export const PUT = withMiddleware(
  * DELETE /api/auth - Sign out or delete account
  */
 export const DELETE = withMiddleware(
-  async (request: NextRequest, context?: RouteContext) => {
-    const { action } = validateQueryParams(request, deleteQuerySchema)
-    const token = extractBearerToken(request)
+  async (request: NextRequest, context: RouteContext) => {
+    const action = new URL(request.url).searchParams.get('action')
+    if (action !== 'signout' && action !== 'delete_account') {
+      return errorResponse('Invalid action. Use: signout or delete_account', 400, {
+        requestId: context.requestId
+      })
+    }
+
+    const token = getSessionToken(request)
+    if (!token) {
+      return errorResponse('Not authenticated', 401, {
+        requestId: context.requestId
+      })
+    }
 
     if (action === 'signout') {
       // In production: Invalidate JWT token in Redis/database
-      return apiSuccess(
+      SESSION_STORE.delete(token)
+
+      return clearSessionCookie(successResponse(
         {
           message: 'Signed out successfully'
         },
         {
-          requestId: context?.requestId
+          requestId: context.requestId
         }
-      )
+      ))
     }
 
     if (action === 'delete_account') {
-      // Find and remove user
-      const userIndex = MOCK_USERS.findIndex(u => getUserByToken(token)?.id === u.id)
+      const user = getUserByToken(token)
+      if (!user) {
+        return errorResponse('Not authenticated', 401, {
+          requestId: context.requestId
+        })
+      }
+
+      const userIndex = MOCK_USERS.findIndex(existingUser => existingUser.id === user.id)
 
       if (userIndex === -1) {
-        throw new NotFoundError('User')
+        return errorResponse('Not authenticated', 401, {
+          requestId: context.requestId
+        })
       }
 
       /**
@@ -439,15 +659,23 @@ export const DELETE = withMiddleware(
        */
 
       MOCK_USERS.splice(userIndex, 1)
+      PASSWORD_STORE.delete(user.email)
+      SESSION_STORE.delete(token)
 
-      return apiNoContent()
+      return clearSessionCookie(new NextResponse(null, { status: 204 }))
     }
 
-    throw new Error('Invalid action')
+    return errorResponse('Invalid action. Use: signout or delete_account', 400, {
+      requestId: context.requestId
+    })
   },
   [
     loggingMiddleware,
-    rateLimitMiddleware({ maxRequests: 3, windowMs: 60000 })
+    rateLimitMiddleware({
+      maxRequests: 3,
+      windowMs: 60000,
+      skip: () => process.env.NODE_ENV === 'test'
+    })
   ]
 )
 

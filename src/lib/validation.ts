@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import DOMPurify from 'isomorphic-dompurify'
 
 /**
  * Sanitize user input to prevent XSS attacks
@@ -7,12 +6,11 @@ import DOMPurify from 'isomorphic-dompurify'
 export function sanitizeInput(input: string): string {
   if (!input) return ''
 
-  // Use DOMPurify to sanitize HTML and scripts
-  const sanitized = DOMPurify.sanitize(input, {
-    ALLOWED_TAGS: [], // Strip all HTML tags
-    ALLOWED_ATTR: [], // Strip all attributes
-    KEEP_CONTENT: true, // Keep the text content
-  })
+  // Strip script/style tags first, then remove remaining HTML tags.
+  const sanitized = input
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?>[\s\S]*?<\/style>/gi, '')
+    .replace(/<[^>]*>/g, '')
 
   return sanitized.trim()
 }

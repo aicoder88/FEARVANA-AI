@@ -11,8 +11,8 @@ import type {
   TierRevenue,
   SegmentRevenue,
 } from '@/types/business-analytics'
-import type { Subscription } from '@/app/api/subscriptions/route'
-import type { AICoachingProduct } from '@/app/api/products/route'
+import type { Subscription } from '@/lib/mock/subscriptions'
+import type { AICoachingProduct } from '@/lib/mock/products'
 
 /**
  * Calculate overall business metrics

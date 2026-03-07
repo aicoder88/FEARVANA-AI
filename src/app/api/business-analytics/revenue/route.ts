@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { aggregateRevenue } from '@/lib/services/analytics-service'
 import type { RevenueResponse, AnalyticsFilter } from '@/types/business-analytics'
-import { AKSHAY_AI_PRODUCTS } from '@/app/api/products/route'
-
-// Import mock subscriptions from metrics route
-import { MOCK_SUBSCRIPTIONS } from '../metrics/route'
-
-export { MOCK_SUBSCRIPTIONS }
+import { AKSHAY_AI_PRODUCTS } from '@/lib/mock/products'
+import { MOCK_SUBSCRIPTIONS } from '@/lib/mock/subscriptions'
 
 export async function GET(request: NextRequest) {
   try {

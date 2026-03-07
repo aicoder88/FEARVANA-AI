@@ -61,8 +61,9 @@ export async function getLifeAreaScores(profileId?: string): Promise<LifeAreaSco
     // Calculate scores from entries
     const scores: Record<string, number> = {}
 
-    for (const level of lifeLevels) {
-      const frontendKey = REVERSE_CATEGORY_MAP[level.category]
+    for (const level of lifeLevels as Array<{ category: LifeLevelCategory; entries: Array<{ metric: Record<string, number>; ts: string }> | null }>) {
+      const frontendKey =
+        REVERSE_CATEGORY_MAP[level.category as keyof typeof REVERSE_CATEGORY_MAP]
       if (!frontendKey) continue
 
       const entries = level.entries as Array<{ metric: Record<string, number>; ts: string }>
@@ -151,7 +152,7 @@ export async function updateLifeAreaScore(
           profile_id: profileId,
           category: dbCategory,
           goal_jsonb: {},
-        })
+        } as any)
         .select('id')
         .single()
 
@@ -168,7 +169,7 @@ export async function updateLifeAreaScore(
       .insert({
         level_id: lifeLevel.id,
         metric: metrics,
-      })
+      } as any)
 
     if (entryError) {
       console.error('Error creating entry:', entryError)

@@ -160,7 +160,7 @@ export function StatCard({
               {icon && (
                 <div className={cn('flex-shrink-0', colorStyle.icon)}>
                   {React.isValidElement(icon)
-                    ? React.cloneElement(icon as React.ReactElement, {
+                    ? React.cloneElement(icon as React.ReactElement<{ className?: string }>, {
                         className: cn("w-5 h-5", colorStyle.icon)
                       })
                     : icon

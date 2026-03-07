@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CheckCircle, ArrowRight, Users, Target, Shield, Mountain } from 'lucide-react'
-import { AICoachingProduct } from '../api/products/route'
+import type { AICoachingProduct } from '@/lib/mock/products'
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<AICoachingProduct[]>([])

@@ -5,7 +5,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
-import type { Commitment, CommitmentRow } from '@/types/akshay-coaching'
+import type { Commitment } from '@/types/akshay-coaching'
 
 export class CommitmentTracker {
   private supabase
@@ -52,7 +52,11 @@ export class CommitmentTracker {
       dueDate,
       status: 'pending',
       followUpCount: 0,
-      metadata: metadata || {}
+      metadata: {
+        createdInSession: metadata?.createdInSession || new Date().toISOString(),
+        importance: metadata?.importance || 'medium',
+        ...(metadata?.category && { category: metadata.category }),
+      }
     }
   }
 

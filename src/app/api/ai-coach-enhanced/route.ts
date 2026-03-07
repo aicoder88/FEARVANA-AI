@@ -319,7 +319,7 @@ export async function GET(request: NextRequest) {
     const aiService = getAIService()
     const config: AIServiceConfig = {
       provider: provider as 'claude' | 'openai',
-      model: model || (provider === 'claude' ? 'claude-3-5-sonnet-20241022' : 'gpt-4o'),
+      model: (model || (provider === 'claude' ? 'claude-3-5-sonnet-20241022' : 'gpt-4o')) as AIServiceConfig['model'],
       temperature: 0.7,
       maxTokens: 1024,
       enableCaching: false // Disable caching for streaming

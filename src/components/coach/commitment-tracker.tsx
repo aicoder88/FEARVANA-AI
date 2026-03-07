@@ -234,7 +234,7 @@ export function CommitmentTracker({
             <p className="text-sm text-muted-foreground">
               Start chatting with AI Akshay to identify your Sacred Edge and make your first commitment.
             </p>
-          </Card>
+          </CardContent>
         </Card>
       )}
 

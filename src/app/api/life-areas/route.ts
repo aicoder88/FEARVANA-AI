@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
     // Calculate scores from entries
     const scores: Record<string, number> = {}
 
-    for (const level of lifeLevels) {
+    for (const level of lifeLevels as Array<{ category: LifeLevelCategory; entries: Array<{ metric: Record<string, number>; ts: string }> | null }>) {
       const frontendKey = REVERSE_CATEGORY_MAP[level.category as LifeLevelCategory]
       if (!frontendKey) continue
 

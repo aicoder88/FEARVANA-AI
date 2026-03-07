@@ -1,4 +1,4 @@
-import { LifeLevelCategory } from './database.types'
+import { LifeLevelCategory } from '../database.types'
 
 interface OpenAIConfig {
   apiKey: string

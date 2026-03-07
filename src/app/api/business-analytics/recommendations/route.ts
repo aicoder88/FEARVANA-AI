@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { generateRecommendations } from '@/lib/services/ai-insights-service'
 import { calculateMetrics, aggregateRevenue, calculateSubscriptionMetrics } from '@/lib/services/analytics-service'
 import type { RecommendationsResponse } from '@/types/business-analytics'
-import { AKSHAY_AI_PRODUCTS } from '@/app/api/products/route'
-import { MOCK_SUBSCRIPTIONS } from '../metrics/route'
+import { AKSHAY_AI_PRODUCTS } from '@/lib/mock/products'
+import { MOCK_SUBSCRIPTIONS } from '@/lib/mock/subscriptions'
 
 export async function GET(request: NextRequest) {
   try {

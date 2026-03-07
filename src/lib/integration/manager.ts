@@ -79,14 +79,14 @@ export class IntegrationManager {
 
         // Add optional contexts if available
         if (crmContext.status === 'fulfilled') {
-          baseContext.crmContext = crmContext.value
+          baseContext.crmContext = crmContext.value ?? undefined
           baseContext.dataFreshness!.crmContext = new Date()
         } else {
           logger.warn('CRM context unavailable', undefined, undefined)
         }
 
         if (schedulingContext.status === 'fulfilled') {
-          baseContext.schedulingContext = schedulingContext.value
+          baseContext.schedulingContext = schedulingContext.value ?? undefined
           baseContext.dataFreshness!.schedulingContext = new Date()
         } else {
           logger.warn('Scheduling context unavailable', undefined, undefined)

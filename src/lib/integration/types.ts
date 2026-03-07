@@ -36,7 +36,7 @@ export interface CustomerContext {
   customerId: string
   retrievedAt: Date
   tokenCount: number
-  dataFreshness: {
+  dataFreshness?: {
     profile: Date
     lifeAreas: Date
     spiralState: Date

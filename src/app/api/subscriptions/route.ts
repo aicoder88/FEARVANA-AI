@@ -1,75 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-export type SubscriptionTier = 'basic' | 'advanced' | 'enterprise'
-export type SubscriptionStatus = 'active' | 'cancelled' | 'past_due' | 'trial'
-
-export type Subscription = {
-  id: string
-  userId: string
-  productId: string
-  productName: string
-  tier: SubscriptionTier
-  status: SubscriptionStatus
-  billing: {
-    amount: number
-    currency: string
-    interval: 'monthly' | 'annual'
-    nextBillingDate: string
-  }
-  features: string[]
-  usage: {
-    aiChatMessages: number
-    aiChatLimit: number
-    expeditionInsights: number
-    expeditionInsightsLimit: number
-    assessmentsCompleted: number
-    assessmentsLimit: number
-  }
-  trial: {
-    isTrialActive: boolean
-    trialEndDate?: string
-    trialDaysRemaining?: number
-  }
-  createdAt: string
-  updatedAt: string
-}
-
-// Mock subscription data (in production, this would come from your database)
-const MOCK_SUBSCRIPTIONS: Subscription[] = [
-  {
-    id: 'sub_001',
-    userId: 'user_001',
-    productId: 'fearvana-ai-coach',
-    productName: 'Fearvana AI Coach',
-    tier: 'basic',
-    status: 'active',
-    billing: {
-      amount: 97,
-      currency: 'USD',
-      interval: 'monthly',
-      nextBillingDate: '2024-02-01T00:00:00Z'
-    },
-    features: [
-      'AI trained on Antarctic expedition audio logs',
-      'Complete "Fearvana" book methodology',
-      'Military combat psychology training',
-      'Real-time "worthy struggle" identification'
-    ],
-    usage: {
-      aiChatMessages: 45,
-      aiChatLimit: 100,
-      expeditionInsights: 12,
-      expeditionInsightsLimit: 25,
-      assessmentsCompleted: 3,
-      assessmentsLimit: 5
-    },
-    trial: {
-      isTrialActive: false
-    },
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-15T00:00:00Z'
-  }
-]
+import {
+  MOCK_SUBSCRIPTIONS,
+  type Subscription,
+  type SubscriptionTier,
+} from '@/lib/mock/subscriptions'
 
 // GET /api/subscriptions - Get user subscriptions
 export async function GET(request: NextRequest) {
