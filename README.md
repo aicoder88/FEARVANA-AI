@@ -1,311 +1,224 @@
-# Fearvanai Knowledge Base System
+# 🎯 Fearvana AI - Find Your Sacred Edge
 
-A comprehensive data collection and knowledge base system designed to capture, process, and organize content (videos, podcasts, coaching sessions, writings) to train and inform AI models.
+**"Find Your Sacred Edge. Live it. Track it. Automate growth."**
 
-## Project Status
+Akshay Nanavati's AI-powered personal development platform designed specifically for YPO leaders and high-achievers who want to transform fear into fuel for extraordinary growth.
 
-✅ **Phase 1: Project Setup & Infrastructure** (Complete)
-✅ **Phase 2: Core Services** (Complete)
-✅ **Phase 3: API Endpoints** (Complete)
-✅ **Phase 4: Frontend UI** (Complete)
-⏳ **Phase 5: Security & Auth** (Pending)
-⏳ **Phase 6: Testing & Documentation** (Pending)
+## 🌟 What is Fearvana AI?
 
-## Features Implemented
+Fearvana AI is the digital embodiment of Akshay Nanavati's teachings from [Fearvana.com](https://fearvana.com). It helps leaders discover their "Sacred Edge" - that place where fear and excitement meet - and provides AI-powered coaching to push through mental barriers and achieve breakthrough results.
 
-### Backend
-- ✅ Monorepo structure with pnpm workspaces
-- ✅ PostgreSQL database with Prisma ORM
-- ✅ File storage system with local filesystem support
-- ✅ Bull queue for async processing with Redis
-- ✅ Pinecone vector database integration
-- ✅ Express API server with middleware (CORS, helmet, logging, error handling)
-- ✅ Content service (CRUD operations, versioning)
-- ✅ Processing service (orchestrate jobs, retry logic)
-- ✅ OpenAI integration (Whisper transcription, GPT-4 entity extraction, embeddings)
-- ✅ Search service (hybrid full-text + semantic search)
-- ✅ Queue processors (transcription, embeddings, entity extraction)
-- ✅ API endpoints for content, search, and processing
+## 🎯 Core Features
 
-### Frontend
-- ✅ React 18 with TypeScript
-- ✅ Vite build system
-- ✅ Tailwind CSS for styling
-- ✅ TanStack Query for API state management
-- ✅ React Router for navigation
-- ✅ Upload page with file upload and metadata forms
-- ✅ Library page with content listing and filtering
-- ✅ Search page with hybrid search
+### 🤖 AI Akshay Coach
+- **RAG-Powered Conversations**: Chat with AI trained on Akshay's books, frameworks, and teachings
+- **Personalized Coaching**: Get direct, challenging guidance rooted in the warrior mindset
+- **Voice Integration**: Hear responses in Akshay's voice (ElevenLabs integration)
+- **Sacred Edge Discovery**: Guided sessions to identify what you're avoiding and why
 
-## Technology Stack
+### 🎯 Sacred Edge Finder
+- **Deep Reflection Tool**: Multi-phase assessment to uncover your biggest growth opportunities
+- **Fear Analysis**: Understand the patterns behind what you avoid
+- **Action Planning**: Get specific experiments to push your Sacred Edge
+- **Progress Tracking**: Monitor your courage-building journey
 
-### Backend
-- Node.js 20+
-- Express.js
-- TypeScript
-- PostgreSQL 15+ with Prisma ORM
-- Redis (Bull queue)
-- Pinecone (vector database)
-- OpenAI API (Whisper, GPT-4, Embeddings)
-- Winston (logging)
+### 📋 AI-Generated Daily Tasks
+- **Personalized Action Plans**: Daily missions tailored to your Sacred Edge
+- **Comfort Zone Challenges**: Tasks designed to build mental toughness
+- **Priority Intelligence**: AI determines what matters most right now
+- **Progress Gamification**: Track completion and build momentum
+
+### 📊 Life Levels Dashboard
+- **8 Core Areas**: Mindset, Relationships, Wealth, Fitness, Health, Career, Peace
+- **Visual Progress**: Radar charts and trend analysis
+- **Goal Tracking**: Set and monitor targets across all life areas
+- **Sacred Edge Integration**: Identify which areas need courage-based growth
+
+### 🧠 Insights & Analytics
+- **Pattern Recognition**: AI identifies your fear patterns and breakthrough moments
+- **Journal Integration**: Reflect on daily experiences and extract insights
+- **Trend Analysis**: Understand what drives your peak performance
+- **Actionable Intelligence**: Get specific recommendations based on your data
+
+## 🏗️ Technical Architecture
 
 ### Frontend
-- React 18
-- TypeScript
-- Vite
-- Tailwind CSS
-- TanStack Query
-- React Router
-- Axios
+- **Framework**: Next.js 15 with App Router
+- **Styling**: Tailwind CSS + Shadcn/ui components
+- **State Management**: React hooks + Context
+- **Charts**: Recharts for data visualization
+- **Icons**: Lucide React
 
-## Quick Start
+### AI & Backend
+- **Primary AI**: Claude 3 Sonnet (Anthropic)
+- **Fallback AI**: GPT-4o (OpenAI)
+- **RAG Pipeline**: LlamaIndex + Pinecone vector database
+- **Embeddings**: OpenAI text-embedding-3-small
+- **Voice**: ElevenLabs (custom Akshay voice)
+- **Database**: Supabase (optional)
+
+### Deployment
+- **Hosting**: Vercel
+- **Environment**: Docker containers
+- **CDN**: Vercel Edge Network
+- **Analytics**: Built-in tracking
+
+## 🚀 Getting Started
 
 ### Prerequisites
-
-- Node.js 20+
-- pnpm 8+
-- PostgreSQL 15+
-- Redis
-- OpenAI API key
-- Pinecone account and API key
+- Node.js 18+
+- npm or pnpm
+- API keys for AI services
 
 ### Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/your-org/fearvana-ai.git
+cd fearvana-ai
+
 # Install dependencies
-pnpm install
+npm install
 
-# Build shared package
-cd packages/shared
-pnpm build
+# Set up environment variables
+cp .env.example .env.local
+# Add your API keys to .env.local
 
-# Setup backend
-cd ../backend
-
-# Copy environment variables
-cp .env.example .env
-
-# Edit .env with your credentials:
-# - DATABASE_URL
-# - REDIS_HOST, REDIS_PORT
-# - OPENAI_API_KEY
-# - PINECONE_API_KEY, PINECONE_ENVIRONMENT, PINECONE_INDEX
-# - JWT_SECRET
-
-# Generate Prisma client and run migrations
-pnpm db:generate
-pnpm db:migrate
-
-# Create storage directories
-mkdir -p storage/uploads/{videos,audio,documents,temp}
-mkdir -p storage/{transcripts,processed,exports}
-mkdir -p logs
-
-# Start backend dev server
-pnpm dev
+# Run development server
+npm run dev
 ```
 
-### Start Frontend
-
-```bash
-cd packages/frontend
-pnpm dev
-```
-
-The frontend will be available at http://localhost:5173
-The backend API will be available at http://localhost:3000
-
-## Project Structure
-
-```
-Fearvanai/
-├── packages/
-│   ├── backend/          # Express API server
-│   │   ├── src/
-│   │   │   ├── controllers/    # Request handlers
-│   │   │   ├── services/       # Business logic
-│   │   │   ├── routes/         # API routes
-│   │   │   ├── middleware/     # Express middleware
-│   │   │   ├── queue/          # Bull queue & processors
-│   │   │   ├── storage/        # File storage
-│   │   │   ├── vector/         # Pinecone integration
-│   │   │   ├── integrations/   # OpenAI client
-│   │   │   └── utils/          # Config, logger
-│   │   └── prisma/
-│   │       └── schema.prisma   # Database schema
-│   ├── frontend/         # React application
-│   │   └── src/
-│   │       ├── pages/          # Page components
-│   │       ├── components/     # Reusable components
-│   │       ├── api/            # API client
-│   │       ├── hooks/          # React hooks
-│   │       └── utils/          # Utilities
-│   └── shared/           # Shared TypeScript types
-│       └── src/
-│           └── types/          # Common interfaces
-└── .specs/               # Specification documents
-    └── knowledge-base-system/
-        ├── requirements.md     # User stories & AC
-        ├── design.md          # Architecture design
-        ├── tasks.md           # Implementation tasks
-        └── README.md          # Spec summary
-```
-
-## API Endpoints
-
-### Content Management
-- `POST /api/content` - Upload content
-- `GET /api/content` - List content with filters
-- `GET /api/content/:id` - Get content by ID
-- `PATCH /api/content/:id` - Update content
-- `DELETE /api/content/:id` - Delete content
-
-### Search
-- `POST /api/search` - Search content
-- `GET /api/search/suggestions` - Get search suggestions
-
-### Processing
-- `GET /api/process/:contentId` - Get processing status
-- `POST /api/process/:contentId` - Trigger processing
-- `POST /api/process/jobs/:jobId/retry` - Retry failed job
-
-### Health
-- `GET /health` - Health check
-
-## Database Schema
-
-Key models:
-- **ContentItem** - Core content entity (videos, audio, documents, text)
-- **Tag** - Content tags
-- **Category** - Hierarchical categories
-- **Entity** - Extracted entities (people, places, concepts, topics)
-- **ContentVersion** - Version history
-- **Embedding** - Vector embeddings for semantic search
-- **ProcessingJob** - Async job tracking
-- **User** - User accounts
-
-## Processing Pipeline
-
-```
-Upload → Validate → Store File → Create DB Record
-           ↓
-    Queue Transcription/Text Extraction
-           ↓
-    Generate Transcript/Extract Text
-           ↓
-    Queue Embedding Generation
-           ↓
-    Chunk Text → Generate Vectors → Store in Pinecone
-           ↓
-    Queue Entity Extraction & Tag Suggestion
-           ↓
-    Extract Entities → Store in DB
-           ↓
-    Mark as COMPLETED
-```
-
-## Next Steps
-
-### Phase 5: Security & Auth (Pending)
-- [ ] Implement JWT authentication
-- [ ] Add user registration and login
-- [ ] Implement RBAC (roles: ADMIN, EDITOR, VIEWER, API_CLIENT)
-- [ ] Add authentication middleware to routes
-- [ ] Implement API key authentication for exports
-
-### Phase 6: Testing & Documentation (Pending)
-- [ ] Unit tests for services
-- [ ] Integration tests for API endpoints
-- [ ] E2E tests for frontend
-- [ ] Performance testing
-- [ ] API documentation (Swagger/OpenAPI)
-- [ ] User guide
-
-### Additional Features (Future)
-- [ ] Text extraction processor for documents (PDF, DOCX)
-- [ ] Tag suggestion processor
-- [ ] Analytics service and dashboard
-- [ ] Export service for AI training
-- [ ] Content detail page
-- [ ] Version comparison UI
-- [ ] Real-time processing updates (WebSockets)
-- [ ] Batch operations UI
-- [ ] Advanced filters
-- [ ] User settings page
-
-## Development Commands
-
-```bash
-# Root
-pnpm install          # Install all dependencies
-pnpm dev             # Run all packages in dev mode
-pnpm build           # Build all packages
-pnpm lint            # Lint all packages
-
-# Backend
-pnpm --filter backend dev              # Start dev server
-pnpm --filter backend db:migrate       # Run migrations
-pnpm --filter backend db:generate      # Generate Prisma client
-pnpm --filter backend db:studio        # Open Prisma Studio
-
-# Frontend
-pnpm --filter frontend dev             # Start dev server
-pnpm --filter frontend build           # Build for production
-```
-
-## Environment Variables
-
-### Backend (.env)
+### Environment Variables
 
 ```env
-NODE_ENV=development
-PORT=3000
+# AI Services
+OPENAI_API_KEY=your_openai_key
+ANTHROPIC_API_KEY=your_claude_key
+ELEVENLABS_API_KEY=your_elevenlabs_key
+PINECONE_API_KEY=your_pinecone_key
 
-DATABASE_URL=postgresql://user:password@localhost:5432/fearvanai_kb
+# Database (Optional)
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_key
 
-REDIS_HOST=localhost
-REDIS_PORT=6379
-
-JWT_SECRET=your-secret-key
-
-OPENAI_API_KEY=sk-...
-
-PINECONE_API_KEY=...
-PINECONE_ENVIRONMENT=...
-PINECONE_INDEX=fearvanai-embeddings
-
-STORAGE_PATH=./storage
-MAX_FILE_SIZE=5368709120
-
-TRANSCRIPTION_MODEL=whisper-1
-EMBEDDING_MODEL=text-embedding-ada-002
+# App Configuration
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-## Troubleshooting
+## 📁 Project Structure
 
-### Database connection issues
-- Ensure PostgreSQL is running
-- Check DATABASE_URL in .env
-- Run `pnpm db:migrate` to apply migrations
+```
+fearvana-ai/
+├── src/
+│   ├── app/                    # Next.js app router pages
+│   │   ├── page.tsx           # Dashboard home
+│   │   ├── chat/              # AI Akshay chat interface
+│   │   ├── sacred-edge/       # Sacred Edge discovery tool
+│   │   ├── tasks/             # Daily AI-generated tasks
+│   │   ├── levels/            # Life areas tracking
+│   │   ├── insights/          # Analytics & journaling
+│   │   └── api/               # Backend API routes
+│   ├── components/            # Reusable UI components
+│   │   ├── ui/               # Shadcn/ui base components
+│   │   ├── dashboard/        # Dashboard-specific components
+│   │   └── layout/           # Layout components
+│   └── lib/                  # Utilities and configurations
+│       ├── constants.ts      # App constants and prompts
+│       ├── ai-service.ts     # AI integration logic
+│       └── utils.ts          # Helper functions
+├── public/                   # Static assets
+└── docs/                     # Documentation
+```
 
-### Redis connection issues
-- Ensure Redis is running
-- Check REDIS_HOST and REDIS_PORT in .env
+## 🎯 Sacred Edge Philosophy
 
-### File upload issues
-- Ensure storage directories exist
-- Check file size limits (default: 5GB)
-- Check disk space
+The Sacred Edge is Akshay Nanavati's core concept - the intersection of fear and excitement where real growth happens. This platform helps users:
 
-### Processing jobs stuck
-- Check Redis connection
-- View queue in Bull Board (if added)
-- Check logs in `logs/` directory
+1. **Identify** what they're avoiding
+2. **Understand** why they're avoiding it
+3. **Create** experiments to face their fears
+4. **Track** progress and breakthroughs
+5. **Integrate** lessons into daily life
 
-## License
+## 🔧 API Integration
 
-Proprietary - All rights reserved
+### Chat API
+```typescript
+// Example: Chat with AI Akshay
+const response = await fetch('/api/chat', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    message: "I'm afraid to have a difficult conversation",
+    context: userContext
+  })
+})
+```
 
-## Contact
+### Sacred Edge API
+```typescript
+// Example: Generate Sacred Edge analysis
+const analysis = await fetch('/api/sacred-edge', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    responses: userResponses,
+    userId: currentUser.id
+  })
+})
+```
 
-For questions or support, contact the development team.
+## 🎨 Design System
+
+- **Primary Colors**: Orange (#f97316) to Red (#ef4444) gradients
+- **Typography**: Geist Sans for UI, Geist Mono for code
+- **Components**: Shadcn/ui with custom Fearvana styling
+- **Icons**: Lucide React with custom Sacred Edge iconography
+- **Animations**: Tailwind CSS animations with custom transitions
+
+## 🔒 Privacy & Security
+
+- **Data Minimization**: Only collect essential user data
+- **Encryption**: All sensitive data encrypted at rest and in transit
+- **Privacy-First**: AI sessions can be anonymous or locally stored
+- **GDPR Compliant**: Full data export and deletion capabilities
+- **Secure APIs**: Rate limiting and authentication on all endpoints
+
+## 📈 Analytics & Insights
+
+- **User Journey Tracking**: Monitor Sacred Edge discovery process
+- **Engagement Metrics**: Track feature usage and completion rates
+- **AI Performance**: Monitor response quality and user satisfaction
+- **Growth Patterns**: Identify successful coaching strategies
+
+## 🤝 Contributing
+
+We welcome contributions from the community! Please read our [Contributing Guide](CONTRIBUTING.md) for details on:
+
+- Code of conduct
+- Development workflow
+- Pull request process
+- Issue reporting
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **Akshay Nanavati** - Creator of the Sacred Edge philosophy and Fearvana methodology
+- **YPO Community** - Early adopters and feedback providers
+- **Open Source Community** - For the amazing tools and libraries that make this possible
+
+## 📞 Support
+
+- **Documentation**: [docs.fearvana.ai](https://docs.fearvana.ai)
+- **Community**: [Discord](https://discord.gg/fearvana)
+- **Email**: support@fearvana.com
+- **Website**: [fearvana.com](https://fearvana.com)
+
+---
+
+**"The cave you fear to enter holds the treasure you seek."** - Akshay Nanavati
+
+Ready to find your Sacred Edge? [Get started now](https://fearvana.ai) 🎯
