@@ -1,3 +1,4 @@
+import 'openai/shims/node';
 import OpenAI from 'openai';
 import { config } from '../utils/config';
 import { logger } from '../utils/logger';

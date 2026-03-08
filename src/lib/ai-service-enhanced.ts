@@ -4,6 +4,7 @@
  * Includes proper error handling, retry logic, caching, and streaming
  */
 
+import 'openai/shims/node'
 import Anthropic from '@anthropic-ai/sdk'
 import OpenAI from 'openai'
 

@@ -5,6 +5,7 @@
  * richer integration-driven contract (`customerId`).
  */
 
+import 'openai/shims/node'
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { z } from 'zod'
