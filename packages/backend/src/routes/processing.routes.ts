@@ -4,7 +4,7 @@ import { ProcessingService } from '../services/ProcessingService';
 import { QueueManager } from '../queue/QueueManager';
 import { ContentService } from '../services/ContentService';
 
-const router = Router();
+const router: Router = Router();
 
 // Initialize services
 const contentService = new ContentService();

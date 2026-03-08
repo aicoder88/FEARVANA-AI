@@ -1,5 +1,5 @@
 import Queue, { Job, JobOptions } from 'bull';
-import { JobType, ProcessingStatus } from '@fearvanai/shared';
+import { JobType, ProcessingStatus } from '../../../shared/src';
 import { config } from '../utils/config';
 import { logger } from '../utils/logger';
 import { PrismaClient } from '@prisma/client';

@@ -1,4 +1,4 @@
-import { Pinecone } from '@pinecone-database/pinecone';
+import { Pinecone, type RecordMetadata } from '@pinecone-database/pinecone';
 import { VectorStore, VectorMetadata, VectorQueryResult } from './VectorStore';
 import { config } from '../utils/config';
 import { logger } from '../utils/logger';
@@ -52,7 +52,7 @@ export class PineconeClient implements VectorStore {
       return (results.matches || []).map((match) => ({
         id: match.id,
         score: match.score || 0,
-        metadata: match.metadata as VectorMetadata,
+        metadata: toVectorMetadata(match.metadata),
       }));
     } catch (error) {
       logger.error('Failed to query Pinecone', { error });
@@ -70,4 +70,12 @@ export class PineconeClient implements VectorStore {
       throw error;
     }
   }
+}
+
+function toVectorMetadata(metadata?: RecordMetadata): VectorMetadata {
+  return {
+    contentItemId: String(metadata?.contentItemId || ''),
+    chunkIndex: Number(metadata?.chunkIndex || 0),
+    text: String(metadata?.text || ''),
+  };
 }

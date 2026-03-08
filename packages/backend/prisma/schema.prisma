@@ -103,7 +103,6 @@ model ContentItem {
   @@index([author, isPrivate])
   @@index([createdAt])
   @@index([type])
-  @@fulltext([title, description, transcript, extractedText])
 }
 
 model Tag {
@@ -213,7 +212,6 @@ model SearchQuery {
   createdAt DateTime @default(now())
 
   @@index([createdAt])
-  @@fulltext([query])
 }
 
 model Session {

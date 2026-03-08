@@ -188,6 +188,7 @@ export interface ResponseContext {
   userContext: UserContext
   conversationHistory: ConversationTurn[]
   relevantKnowledge: KnowledgeChunk[]
+  retrievedContext: RetrievedAkshayContext
   communicationStrategy: CommunicationStrategy
 }
 
@@ -196,6 +197,37 @@ export interface KnowledgeChunk {
   content: string
   relevanceScore: number
   source: string
+}
+
+export interface RetrievedAkshayChunk {
+  id: string
+  documentId: string
+  title: string
+  sourceKind: string
+  sourceLabel: string | null
+  sourceCitation: string | null
+  sectionTitle: string | null
+  content: string
+  tags: string[]
+  metadata: Record<string, unknown>
+  similarity: number
+}
+
+export interface RetrievedAkshayMemoryRecord {
+  id: string
+  title: string
+  body: string
+  canonicalPhrase: string | null
+  memoryType: string
+  tags: string[]
+  importance: number
+  metadata: Record<string, unknown>
+}
+
+export interface RetrievedAkshayContext {
+  chunks: RetrievedAkshayChunk[]
+  memoryRecords: RetrievedAkshayMemoryRecord[]
+  knowledge: KnowledgeChunk[]
 }
 
 export interface AntarcticaExample {

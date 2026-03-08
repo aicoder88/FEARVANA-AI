@@ -15,6 +15,7 @@ import { getPersonalityEngine } from './personality/akshay-personality-engine'
 import { getSacredEdgeDiscovery } from './personality/sacred-edge-prompts'
 import { getAdaptationEngine } from './adaptation/spiral-adaptation-engine'
 import { getKnowledgeBase } from './knowledge/akshay-knowledge-base'
+import { getAkshayCorpusRetriever } from './knowledge/akshay-corpus-retriever'
 import { getAIService } from './ai-service-enhanced'
 
 import type {
@@ -38,6 +39,7 @@ export class AkshayCoachingService {
   private sacredEdgeDiscovery = getSacredEdgeDiscovery()
   private adaptationEngine = getAdaptationEngine()
   private knowledgeBase = getKnowledgeBase()
+  private corpusRetriever = getAkshayCorpusRetriever()
   private aiService = getAIService()
 
   /**
@@ -314,7 +316,11 @@ export class AkshayCoachingService {
     )
 
     // Get relevant knowledge from knowledge base
-    const relevantKnowledge = this.knowledgeBase.getRelevantKnowledge(userMessage, 3)
+    const staticKnowledge = this.knowledgeBase.getRelevantKnowledge(userMessage, 3)
+    const retrievedContext = await this.corpusRetriever.retrieveContext(userMessage)
+    const relevantKnowledge = [...retrievedContext.knowledge, ...staticKnowledge]
+      .sort((a, b) => b.relevanceScore - a.relevanceScore)
+      .slice(0, 6)
 
     // Get recent conversation history
     const conversationHistory = userContext.conversationHistory.slice(-10)
@@ -324,6 +330,7 @@ export class AkshayCoachingService {
       userContext,
       conversationHistory,
       relevantKnowledge,
+      retrievedContext,
       communicationStrategy
     }
   }

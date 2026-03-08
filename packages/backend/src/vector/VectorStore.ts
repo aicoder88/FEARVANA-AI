@@ -1,4 +1,5 @@
 export interface VectorMetadata {
+  [key: string]: string | number | boolean | string[];
   contentItemId: string;
   chunkIndex: number;
   text: string;

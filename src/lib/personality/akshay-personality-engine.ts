@@ -11,7 +11,9 @@ import type {
   ResponseContext,
   PersonalityScore,
   CommunicationStrategy,
-  KnowledgeChunk
+  KnowledgeChunk,
+  RetrievedAkshayChunk,
+  RetrievedAkshayMemoryRecord
 } from '@/types/akshay-coaching'
 
 // ============================================================================
@@ -84,7 +86,8 @@ export class AkshayPersonalityEngine {
     const {
       userContext,
       communicationStrategy,
-      relevantKnowledge
+      relevantKnowledge,
+      retrievedContext
     } = context
 
     let prompt = CORE_IDENTITY + '\n\n'
@@ -100,6 +103,14 @@ export class AkshayPersonalityEngine {
     // Add relevant knowledge if available
     if (relevantKnowledge && relevantKnowledge.length > 0) {
       prompt += '\n' + this.buildKnowledgeSection(relevantKnowledge)
+    }
+
+    if (retrievedContext.chunks.length > 0) {
+      prompt += '\n' + this.buildRetrievedChunkSection(retrievedContext.chunks)
+    }
+
+    if (retrievedContext.memoryRecords.length > 0) {
+      prompt += '\n' + this.buildRetrievedMemorySection(retrievedContext.memoryRecords)
     }
 
     // Add response format guidelines
@@ -251,6 +262,33 @@ export class AkshayPersonalityEngine {
 
     knowledge.forEach((chunk, i) => {
       section += `${i + 1}. ${chunk.source}:\n${chunk.content}\n\n`
+    })
+
+    return section
+  }
+
+  private buildRetrievedChunkSection(chunks: RetrievedAkshayChunk[]): string {
+    let section = 'RETRIEVED AKSHAY SOURCE MATERIAL:\n'
+    section += 'Use these as factual grounding when relevant. Do not invent details beyond them.\n\n'
+
+    chunks.forEach((chunk, i) => {
+      section += `${i + 1}. ${chunk.sourceCitation || chunk.title}\n`
+      section += `${chunk.content}\n\n`
+    })
+
+    return section
+  }
+
+  private buildRetrievedMemorySection(records: RetrievedAkshayMemoryRecord[]): string {
+    let section = 'APPROVED AKSHAY MEMORY RECORDS:\n'
+    section += 'Prefer these high-signal summaries when they fit the user message.\n\n'
+
+    records.forEach((record, i) => {
+      section += `${i + 1}. ${record.title} [${record.memoryType}]\n`
+      if (record.canonicalPhrase) {
+        section += `Canonical phrase: ${record.canonicalPhrase}\n`
+      }
+      section += `${record.body}\n\n`
     })
 
     return section

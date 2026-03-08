@@ -26,7 +26,12 @@ export const config = {
   openai: {
     apiKey: process.env.OPENAI_API_KEY || '',
     transcriptionModel: process.env.TRANSCRIPTION_MODEL || 'whisper-1',
-    embeddingModel: process.env.EMBEDDING_MODEL || 'text-embedding-ada-002',
+    embeddingModel: process.env.EMBEDDING_MODEL || 'text-embedding-3-small',
+  },
+
+  supabase: {
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
   },
 
   pinecone: {
@@ -42,5 +47,9 @@ export const config = {
 
   processing: {
     maxConcurrentJobs: parseInt(process.env.MAX_CONCURRENT_JOBS || '5', 10),
+  },
+
+  imports: {
+    akshayDir: process.env.AKSHAY_IMPORT_DIR || '../../data/akshay/raw',
   },
 };

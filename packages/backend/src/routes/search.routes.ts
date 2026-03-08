@@ -4,7 +4,7 @@ import { SearchService } from '../services/SearchService';
 import { PineconeClient } from '../vector/PineconeClient';
 import { OpenAIClient } from '../integrations/OpenAIClient';
 
-const router = Router();
+const router: Router = Router();
 
 // Initialize services
 const pinecone = new PineconeClient();

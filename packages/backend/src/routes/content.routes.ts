@@ -8,7 +8,7 @@ import { FileStorage } from '../storage/FileStorage';
 import { config } from '../utils/config';
 import path from 'path';
 
-const router = Router();
+const router: Router = Router();
 
 // Setup file upload
 const storage = multer.diskStorage({
