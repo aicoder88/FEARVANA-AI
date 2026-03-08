@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getSessionFromRequest, SESSION_COOKIE_NAME } from '@/lib/session'
 
 // Rate limiting store (in production, use Redis)
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>()
@@ -51,76 +52,63 @@ function checkRateLimit(ip: string, endpoint: string): { allowed: boolean; remai
   return { allowed: true, remaining: limit.requests - record.count, resetTime: record.resetTime }
 }
 
-/**
- * Verify JWT token or session token
- * In production, this should validate against a proper JWT library
- */
-function verifyAuthToken(token: string): { valid: boolean; userId?: string } {
-  // TODO: Replace with actual JWT verification
-  // For now, basic validation
-  if (!token || token.length < 10) {
-    return { valid: false }
-  }
-
-  // In production:
-  // try {
-  //   const decoded = jwt.verify(token, process.env.JWT_SECRET!)
-  //   return { valid: true, userId: decoded.userId }
-  // } catch (error) {
-  //   return { valid: false }
-  // }
-
-  // Mock validation for now
-  if (token.startsWith('token_')) {
-    return { valid: true, userId: 'user_001' }
-  }
-
-  return { valid: false }
+function isStateChangingMethod(method: string): boolean {
+  return ['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)
 }
 
-/**
- * Verify CSRF token for state-changing operations
- */
-function verifyCsrfToken(request: NextRequest): boolean {
-  // Only check CSRF for state-changing methods
-  const method = request.method
-  if (!['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
-    return true
-  }
+function getAllowedOrigins(request: NextRequest): string[] {
+  const configuredOrigins = (process.env.ALLOWED_ORIGINS || '')
+    .split(',')
+    .map(origin => origin.trim())
+    .filter(Boolean)
 
-  const csrfToken = request.headers.get('x-csrf-token')
-  const csrfCookie = request.cookies.get('csrf-token')?.value
-
-  // In production, implement proper CSRF token validation
-  // For now, just check that both exist and match
-  if (!csrfToken || !csrfCookie) {
-    // TODO: Uncomment for production
-    // return false
-    return true // Allow for development
-  }
-
-  return csrfToken === csrfCookie
+  return Array.from(new Set([
+    request.nextUrl.origin,
+    process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+    'http://localhost:3000',
+    'http://localhost:3001',
+    ...configuredOrigins
+  ]))
 }
 
 /**
  * Check if origin is allowed
  */
-function isAllowedOrigin(origin: string | null): boolean {
+function isAllowedOrigin(request: NextRequest, origin: string | null): boolean {
   if (!origin) return false
 
-  const allowedOrigins = [
-    process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-    'http://localhost:3000',
-    'http://localhost:3001',
-  ]
+  return getAllowedOrigins(request).includes(origin)
+}
 
-  // In production, only allow specific domains
-  if (process.env.NODE_ENV === 'production') {
-    return allowedOrigins.includes(origin)
+function hasBearerToken(request: NextRequest): boolean {
+  const authHeader = request.headers.get('authorization')
+  return Boolean(authHeader?.startsWith('Bearer '))
+}
+
+function isTrustedCookieWriteRequest(request: NextRequest): boolean {
+  if (!isStateChangingMethod(request.method)) {
+    return true
   }
 
-  // In development, be more permissive
-  return origin.startsWith('http://localhost') || allowedOrigins.includes(origin)
+  if (!request.cookies.has(SESSION_COOKIE_NAME) || hasBearerToken(request)) {
+    return true
+  }
+
+  const origin = request.headers.get('origin')
+  if (origin) {
+    return isAllowedOrigin(request, origin)
+  }
+
+  const referer = request.headers.get('referer')
+  if (referer) {
+    try {
+      return isAllowedOrigin(request, new URL(referer).origin)
+    } catch {
+      return false
+    }
+  }
+
+  return false
 }
 
 /**
@@ -134,7 +122,7 @@ export async function middleware(request: NextRequest) {
 
   // Get client IP for rate limiting
   const ip =
-    request.headers.get('x-forwarded-for') ||
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     request.headers.get('x-real-ip') ||
     'unknown'
 
@@ -161,46 +149,37 @@ export async function middleware(request: NextRequest) {
 
   // CORS check
   const origin = request.headers.get('origin')
-  if (origin && !isAllowedOrigin(origin)) {
+  if (origin && !isAllowedOrigin(request, origin)) {
     return NextResponse.json({ error: 'CORS policy violation' }, { status: 403 })
   }
 
-  // CSRF check for state-changing operations
-  if (!verifyCsrfToken(request)) {
-    return NextResponse.json({ error: 'CSRF token validation failed' }, { status: 403 })
+  // Same-origin enforcement for cookie-authenticated state-changing requests.
+  if (!isTrustedCookieWriteRequest(request)) {
+    return NextResponse.json({ error: 'Same-origin validation failed' }, { status: 403 })
   }
 
   // Protected API routes require authentication
-  const protectedRoutes = [
-    '/api/ai-coach',
-    '/api/antarctica-ai',
-    '/api/payments',
-    '/api/subscriptions',
-    '/api/corporate-programs',
-  ]
-
   const requestHeaders = new Headers(request.headers)
-  const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
+  const isProtectedRoute =
+    pathname.startsWith('/api/ai-coach') ||
+    pathname.startsWith('/api/antarctica-ai') ||
+    pathname.startsWith('/api/payments') ||
+    pathname.startsWith('/api/subscriptions') ||
+    (pathname.startsWith('/api/corporate-programs') && request.method === 'PUT')
 
   if (isProtectedRoute) {
-    const authHeader = request.headers.get('Authorization')
+    const session = await getSessionFromRequest(request)
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!session) {
       return NextResponse.json(
-        { error: 'Authentication required. Please provide a valid Bearer token.' },
+        { error: 'Authentication required. Please provide a valid session or Bearer token.' },
         { status: 401 }
       )
     }
 
-    const token = authHeader.substring(7)
-    const { valid, userId } = verifyAuthToken(token)
-
-    if (!valid) {
-      return NextResponse.json({ error: 'Invalid or expired authentication token.' }, { status: 401 })
-    }
-
     // Add userId to request headers for use in API routes
-    requestHeaders.set('x-user-id', userId || '')
+    requestHeaders.set('x-user-id', session.userId)
+    requestHeaders.set('x-user-email', session.email)
   }
 
   const response = NextResponse.next({

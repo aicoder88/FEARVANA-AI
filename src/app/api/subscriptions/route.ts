@@ -4,21 +4,21 @@ import {
   type Subscription,
   type SubscriptionTier,
 } from '@/lib/mock/subscriptions'
+import {
+  getMiddlewareAuthenticatedUserId,
+  middlewareAuthenticationRequiredResponse,
+} from '@/lib/api/request-auth'
 
 // GET /api/subscriptions - Get user subscriptions
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  const userId = searchParams.get('userId')
-  
+  const userId = getMiddlewareAuthenticatedUserId(request)
+
   if (!userId) {
-    return NextResponse.json(
-      { error: 'User ID is required' },
-      { status: 400 }
-    )
+    return middlewareAuthenticationRequiredResponse()
   }
-  
+
   const userSubscriptions = MOCK_SUBSCRIPTIONS.filter(sub => sub.userId === userId)
-  
+
   return NextResponse.json({
     subscriptions: userSubscriptions,
     total: userSubscriptions.length
@@ -28,17 +28,21 @@ export async function GET(request: NextRequest) {
 // POST /api/subscriptions - Create new subscription
 export async function POST(request: NextRequest) {
   try {
+    const authenticatedUserId = getMiddlewareAuthenticatedUserId(request)
+    if (!authenticatedUserId) {
+      return middlewareAuthenticationRequiredResponse()
+    }
+
     const { 
-      userId, 
       productId, 
       tier, 
       billingInterval = 'monthly',
       paymentMethodId 
     } = await request.json()
-    
-    if (!userId || !productId || !paymentMethodId) {
+
+    if (!productId || !paymentMethodId) {
       return NextResponse.json(
-        { error: 'userId, productId, and paymentMethodId are required' },
+        { error: 'productId and paymentMethodId are required' },
         { status: 400 }
       )
     }
@@ -52,7 +56,7 @@ export async function POST(request: NextRequest) {
     
     const newSubscription: Subscription = {
       id: `sub_${Date.now()}`,
-      userId,
+      userId: authenticatedUserId,
       productId,
       productName: 'Fearvana AI Coach', // Would lookup from products
       tier: tier as SubscriptionTier,
@@ -102,8 +106,12 @@ export async function POST(request: NextRequest) {
 // PUT /api/subscriptions - Update subscription
 export async function PUT(request: NextRequest) {
   try {
+    if (!getMiddlewareAuthenticatedUserId(request)) {
+      return middlewareAuthenticationRequiredResponse()
+    }
+
     const { subscriptionId, updates } = await request.json()
-    
+
     if (!subscriptionId) {
       return NextResponse.json(
         { error: 'Subscription ID is required' },
@@ -134,10 +142,14 @@ export async function PUT(request: NextRequest) {
 
 // DELETE /api/subscriptions - Cancel subscription
 export async function DELETE(request: NextRequest) {
+  if (!getMiddlewareAuthenticatedUserId(request)) {
+    return middlewareAuthenticationRequiredResponse()
+  }
+
   const { searchParams } = new URL(request.url)
   const subscriptionId = searchParams.get('subscriptionId')
   const cancelImmediately = searchParams.get('immediate') === 'true'
-  
+
   if (!subscriptionId) {
     return NextResponse.json(
       { error: 'Subscription ID is required' },

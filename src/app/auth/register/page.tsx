@@ -133,10 +133,7 @@ export default function RegisterPage() {
 
       if (response.ok) {
         setSuccess('Welcome to your transformation journey!')
-        
-        // Store session token
-        localStorage.setItem('fearvana_token', data.session.token)
-        localStorage.setItem('fearvana_user', JSON.stringify(data.session.user))
+        localStorage.setItem('fearvana_user', JSON.stringify(data.user))
         
         // Redirect to onboarding or product selection
         setTimeout(() => {

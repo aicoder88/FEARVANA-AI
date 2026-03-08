@@ -37,6 +37,11 @@ interface AkshayMemoryRecordRow {
   metadata: JsonRecord | null
 }
 
+interface ListApprovedAkshayMemoryRecordsParams {
+  filter_tags: string[] | null
+  result_limit: number
+}
+
 export class AkshayCorpusRetriever {
   private readonly openai: OpenAI | null
   private readonly supabase: SupabaseClient | null
@@ -120,18 +125,13 @@ export class AkshayCorpusRetriever {
       ...chunks.flatMap((chunk) => chunk.tags),
     ])]
 
-    let query = this.supabase
-      .from('akshay_memory_records')
-      .select('id, title, body, canonical_phrase, memory_type, tags, importance, metadata')
-      .eq('status', 'approved')
-      .order('importance', { ascending: false })
-      .limit(4)
-
-    if (tagPool.length > 0) {
-      query = query.overlaps('tags', tagPool)
-    }
-
-    const { data, error } = await query
+    const { data, error } = await this.supabase.rpc(
+      'list_approved_akshay_memory_records',
+      {
+        filter_tags: tagPool.length > 0 ? tagPool : null,
+        result_limit: 4,
+      } satisfies ListApprovedAkshayMemoryRecordsParams
+    )
 
     if (error) {
       console.warn('Akshay memory record retrieval failed:', error)

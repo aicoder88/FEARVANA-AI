@@ -21,7 +21,7 @@ interface AuthContextValue {
     currentChallenges?: string[]
     goals?: string[]
   }) => Promise<{ success: boolean; user?: User; error?: string }>
-  logout: () => void
+  logout: () => Promise<void>
   updateProfile: (updates: Partial<User['profile']>) => Promise<{ success: boolean; user?: User; error?: string }>
   updateSacredEdge: (sacredEdgeData: Partial<User['profile']['sacredEdgeDiscovery']>) => Promise<{ success: boolean; user?: User; error?: string }>
   refreshUser: () => void

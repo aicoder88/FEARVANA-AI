@@ -39,7 +39,14 @@ export interface AuthState {
 }
 
 const STORAGE_KEY = 'fearvana_user'
-const TOKEN_KEY = 'fearvana_token'
+
+function persistUser(user: User) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(user))
+}
+
+function clearStoredUser() {
+  localStorage.removeItem(STORAGE_KEY)
+}
 
 export function useAuth() {
   const router = useRouter()
@@ -51,19 +58,42 @@ export function useAuth() {
 
   // Load user from localStorage on mount
   useEffect(() => {
-    loadUser()
+    void loadUser()
   }, [])
 
-  const loadUser = useCallback(() => {
+  const loadUser = useCallback(async () => {
     try {
-      const userData = localStorage.getItem(STORAGE_KEY)
-      if (userData) {
-        const user = JSON.parse(userData)
-        setState({ user, loading: false, error: null })
-      } else {
-        setState({ user: null, loading: false, error: null })
+      const response = await fetch('/api/auth', {
+        method: 'GET',
+        credentials: 'same-origin',
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        persistUser(data.user)
+        setState({ user: data.user, loading: false, error: null })
+        return
       }
+
+      if (response.status === 401) {
+        clearStoredUser()
+        setState({ user: null, loading: false, error: null })
+        return
+      }
+
+      throw new Error('Failed to refresh session')
     } catch (error) {
+      try {
+        const userData = localStorage.getItem(STORAGE_KEY)
+        if (userData) {
+          const user = JSON.parse(userData) as User
+          setState({ user, loading: false, error: null })
+          return
+        }
+      } catch (storageError) {
+        console.error('Failed to read cached user:', storageError)
+      }
+
       console.error('Failed to load user:', error)
       setState({ user: null, loading: false, error: 'Failed to load user data' })
     }
@@ -85,13 +115,10 @@ export function useAuth() {
         throw new Error(data.error || 'Login failed')
       }
 
-      // Store session data
-      localStorage.setItem(TOKEN_KEY, data.session.token)
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data.session.user))
+      persistUser(data.user)
+      setState({ user: data.user, loading: false, error: null })
 
-      setState({ user: data.session.user, loading: false, error: null })
-
-      return { success: true, user: data.session.user }
+      return { success: true, user: data.user }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Login failed'
       setState(prev => ({ ...prev, loading: false, error: errorMessage }))
@@ -125,13 +152,10 @@ export function useAuth() {
         throw new Error(data.error || 'Registration failed')
       }
 
-      // Store session data
-      localStorage.setItem(TOKEN_KEY, data.session.token)
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data.session.user))
+      persistUser(data.user)
+      setState({ user: data.user, loading: false, error: null })
 
-      setState({ user: data.session.user, loading: false, error: null })
-
-      return { success: true, user: data.session.user }
+      return { success: true, user: data.user }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Registration failed'
       setState(prev => ({ ...prev, loading: false, error: errorMessage }))
@@ -139,11 +163,19 @@ export function useAuth() {
     }
   }, [])
 
-  const logout = useCallback(() => {
-    localStorage.removeItem(TOKEN_KEY)
-    localStorage.removeItem(STORAGE_KEY)
-    setState({ user: null, loading: false, error: null })
-    router.push('/auth/login')
+  const logout = useCallback(async () => {
+    try {
+      await fetch('/api/auth?action=signout', {
+        method: 'DELETE',
+        credentials: 'same-origin',
+      })
+    } catch (error) {
+      console.error('Failed to clear auth cookie:', error)
+    } finally {
+      clearStoredUser()
+      setState({ user: null, loading: false, error: null })
+      router.push('/auth/login')
+    }
   }, [router])
 
   const updateProfile = useCallback(async (updates: Partial<User['profile']>) => {
@@ -154,12 +186,10 @@ export function useAuth() {
     setState(prev => ({ ...prev, loading: true, error: null }))
 
     try {
-      const token = localStorage.getItem(TOKEN_KEY)
       const response = await fetch('/api/auth', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ action: 'update_profile', ...updates }),
       })
@@ -171,7 +201,7 @@ export function useAuth() {
       }
 
       // Update local storage
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data.user))
+      persistUser(data.user)
       setState({ user: data.user, loading: false, error: null })
 
       return { success: true, user: data.user }
@@ -190,12 +220,10 @@ export function useAuth() {
     setState(prev => ({ ...prev, loading: true, error: null }))
 
     try {
-      const token = localStorage.getItem(TOKEN_KEY)
       const response = await fetch('/api/auth', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ action: 'sacred_edge_discovery', ...sacredEdgeData }),
       })
@@ -207,7 +235,7 @@ export function useAuth() {
       }
 
       // Update local storage
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data.user))
+      persistUser(data.user)
       setState({ user: data.user, loading: false, error: null })
 
       return { success: true, user: data.user }
@@ -232,6 +260,8 @@ export function useAuth() {
     logout,
     updateProfile,
     updateSacredEdge,
-    refreshUser: loadUser,
+    refreshUser: () => {
+      void loadUser()
+    },
   }
 }

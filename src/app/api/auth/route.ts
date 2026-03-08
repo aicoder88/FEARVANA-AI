@@ -4,11 +4,10 @@
  * Handles user authentication, registration, and session management
  *
  * SECURITY NOTES:
- * - This is a simplified mock implementation for development/demo
- * - Production implementation should use proper JWT with signing
- * - Passwords should be hashed with bcrypt/argon2
- * - Use Redis for session storage in production
- * - Implement CSRF protection
+ * - Sessions are signed and verified with HMAC-protected JWTs
+ * - Passwords are derived with scrypt before storage
+ * - Session revocation is in-memory in this demo route; persist it for multi-instance production
+ * - Replace the in-memory user store with a database-backed identity provider for production
  * - Add email verification
  */
 
@@ -21,6 +20,15 @@ import {
   contentTypeMiddleware,
   type RouteContext
 } from '@/lib/api'
+import { hashPassword, verifyPassword } from '@/lib/passwords'
+import {
+  createSessionToken,
+  getClearedSessionCookieOptions,
+  getSessionFromRequest,
+  getSessionCookieOptions,
+  revokeSession,
+  type VerifiedSession
+} from '@/lib/session'
 
 /**
  * Type definitions
@@ -56,7 +64,6 @@ export type User = {
 
 export type AuthSession = {
   token: string
-  user: User
   expiresAt: string
 }
 
@@ -100,11 +107,10 @@ const sacredEdgeUpdateSchema = z.object({
   transformationGoals: z.array(z.string()).optional()
 })
 
-const SESSION_COOKIE_NAME = 'fearvana_session'
-const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000
-const TEST_SESSION_TOKEN = 'mock-token'
-const SESSION_STORE = new Map<string, string>()
-const PASSWORD_STORE = new Map<string, string>([['demo@fearvana.ai', '*']])
+const DEMO_USER_EMAIL = 'demo@fearvana.ai'
+const DEMO_USER_PASSWORD = process.env.DEMO_USER_PASSWORD || 'FearvanaDemo123!'
+const PASSWORD_STORE = new Map<string, string>()
+let passwordSeedPromise: Promise<void> | null = null
 
 /**
  * Mock user database
@@ -141,59 +147,41 @@ const MOCK_USERS: User[] = [
   }
 ]
 
-/**
- * Generate mock auth token
- *
- * PRODUCTION NOTE: Use proper JWT with signing (e.g., jsonwebtoken, jose)
- */
-function generateAuthToken(): string {
-  return `token_${Date.now()}_${crypto.randomUUID()}`
+async function ensureMockCredentials(): Promise<void> {
+  if (PASSWORD_STORE.has(DEMO_USER_EMAIL)) {
+    return
+  }
+
+  if (!passwordSeedPromise) {
+    passwordSeedPromise = hashPassword(DEMO_USER_PASSWORD).then(hash => {
+      PASSWORD_STORE.set(DEMO_USER_EMAIL, hash)
+    })
+  }
+
+  await passwordSeedPromise
 }
 
-/**
- * Find user by token
- *
- * PRODUCTION NOTE: Validate JWT and query database
- */
-function getUserByToken(token: string | null): User | null {
-  if (!token) {
+async function getAuthenticatedUser(request: NextRequest): Promise<{
+  session: VerifiedSession
+  user: User
+} | null> {
+  const session = await getSessionFromRequest(request)
+  if (!session) {
     return null
   }
 
-  if (token === TEST_SESSION_TOKEN) {
-    return MOCK_USERS.find(user => user.email === 'demo@fearvana.ai') || null
-  }
+  const user = MOCK_USERS.find(candidate => {
+    return candidate.id === session.userId && candidate.email === session.email
+  })
 
-  const userId = SESSION_STORE.get(token)
-  if (!userId) {
+  if (!user) {
     return null
   }
 
-  return MOCK_USERS.find(user => user.id === userId) || null
-}
-
-/**
- * Hash password
- *
- * PRODUCTION NOTE: Use bcrypt or argon2
- */
-async function hashPassword(password: string): Promise<string> {
-  // Mock implementation
-  return `hashed_${password}`
-}
-
-/**
- * Verify password
- *
- * PRODUCTION NOTE: Use bcrypt.compare or argon2.verify
- */
-async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  // Mock implementation - in production, use bcrypt.compare
-  if (hash === '*') {
-    return password.length > 0
+  return {
+    session,
+    user
   }
-
-  return hash === `hashed_${password}`
 }
 
 function formatValidationDetails(error: z.ZodError) {
@@ -246,28 +234,15 @@ function successResponse(
 
 function setSessionCookie(response: NextResponse, token: string, expiresAt: string) {
   response.cookies.set({
-    name: SESSION_COOKIE_NAME,
-    value: token,
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-    path: '/',
-    expires: new Date(expiresAt)
+    ...getSessionCookieOptions(expiresAt),
+    value: token
   })
 
   return response
 }
 
 function clearSessionCookie(response: NextResponse) {
-  response.cookies.set({
-    name: SESSION_COOKIE_NAME,
-    value: '',
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-    path: '/',
-    maxAge: 0
-  })
+  response.cookies.set(getClearedSessionCookieOptions())
 
   return response
 }
@@ -280,25 +255,16 @@ async function parseJsonBody(request: NextRequest) {
   }
 }
 
-function getSessionToken(request: NextRequest): string | null {
-  const authHeader = request.headers.get('authorization')
-  if (authHeader?.startsWith('Bearer ')) {
-    const token = authHeader.substring(7).trim()
-    return token || null
-  }
-
-  return request.cookies.get(SESSION_COOKIE_NAME)?.value || null
-}
-
-function createSession(user: User): AuthSession {
-  const token = generateAuthToken()
-  const expiresAt = new Date(Date.now() + SESSION_DURATION_MS).toISOString()
-
-  SESSION_STORE.set(token, user.id)
+async function createSession(user: User): Promise<AuthSession> {
+  const sessionId = crypto.randomUUID()
+  const { token, expiresAt } = await createSessionToken({
+    userId: user.id,
+    email: user.email,
+    sessionId
+  })
 
   return {
     token,
-    user,
     expiresAt
   }
 }
@@ -308,6 +274,8 @@ function createSession(user: User): AuthSession {
  */
 export const POST = withMiddleware(
   async (request: NextRequest, context: RouteContext) => {
+    await ensureMockCredentials()
+
     const body = await parseJsonBody(request)
     if (!body || typeof body !== 'object') {
       return errorResponse('Validation error', 400, {
@@ -340,7 +308,7 @@ export const POST = withMiddleware(
         })
       }
 
-      // Hash password (mock - use bcrypt in production)
+      // Hash password before storing it.
       const passwordHash = await hashPassword(data.password)
 
       // Create new user
@@ -365,12 +333,14 @@ export const POST = withMiddleware(
       PASSWORD_STORE.set(newUser.email, passwordHash)
 
       // Create session token
-      const session = createSession(newUser)
+      const session = await createSession(newUser)
       const response = successResponse(
         {
           message: 'Account created successfully',
           user: newUser,
-          session,
+          session: {
+            expiresAt: session.expiresAt
+          },
           isNewUser: true
         },
         {
@@ -399,8 +369,8 @@ export const POST = withMiddleware(
         })
       }
 
-      // Verify password (mock - use bcrypt in production)
-      const storedHash = PASSWORD_STORE.get(user.email) || 'hashed_password'
+      // Compare the submitted password to the stored scrypt hash.
+      const storedHash = PASSWORD_STORE.get(user.email) || ''
       const isValid = await verifyPassword(data.password, storedHash)
       if (!isValid) {
         return errorResponse('Invalid email or password', 401, {
@@ -412,12 +382,14 @@ export const POST = withMiddleware(
       user.lastActive = new Date().toISOString()
 
       // Create session token
-      const session = createSession(user)
+      const session = await createSession(user)
       const response = successResponse(
         {
           message: 'Signed in successfully',
           user,
-          session,
+          session: {
+            expiresAt: session.expiresAt
+          },
           isNewUser: false
         },
         {
@@ -449,28 +421,19 @@ export const POST = withMiddleware(
  */
 export const GET = withMiddleware(
   async (request: NextRequest, context: RouteContext) => {
-    const token = getSessionToken(request)
-    if (!token) {
-      return errorResponse('Not authenticated', 401, {
-        requestId: context.requestId
-      })
-    }
-
-    // Validate token and get user
-    const user = getUserByToken(token)
-
-    if (!user) {
+    const auth = await getAuthenticatedUser(request)
+    if (!auth) {
       return errorResponse('Not authenticated', 401, {
         requestId: context.requestId
       })
     }
 
     // Update last active
-    user.lastActive = new Date().toISOString()
+    auth.user.lastActive = new Date().toISOString()
 
     return successResponse(
       {
-        user,
+        user: auth.user,
         isAuthenticated: true
       },
       {
@@ -489,6 +452,8 @@ export const GET = withMiddleware(
  */
 export const PUT = withMiddleware(
   async (request: NextRequest, context: RouteContext) => {
+    await ensureMockCredentials()
+
     const body = await parseJsonBody(request)
     if (!body || typeof body !== 'object') {
       return errorResponse('Validation error', 400, {
@@ -503,20 +468,14 @@ export const PUT = withMiddleware(
       })
     }
 
-    const token = getSessionToken(request)
-    if (!token) {
+    const auth = await getAuthenticatedUser(request)
+    if (!auth) {
       return errorResponse('Not authenticated', 401, {
         requestId: context.requestId
       })
     }
 
-    // Find user
-    const user = getUserByToken(token)
-    if (!user) {
-      return errorResponse('Not authenticated', 401, {
-        requestId: context.requestId
-      })
-    }
+    const { user } = auth
 
     if (body.action === 'update_profile') {
       const result = profileUpdateSchema.safeParse(body)
@@ -605,6 +564,8 @@ export const PUT = withMiddleware(
  */
 export const DELETE = withMiddleware(
   async (request: NextRequest, context: RouteContext) => {
+    await ensureMockCredentials()
+
     const action = new URL(request.url).searchParams.get('action')
     if (action !== 'signout' && action !== 'delete_account') {
       return errorResponse('Invalid action. Use: signout or delete_account', 400, {
@@ -612,16 +573,15 @@ export const DELETE = withMiddleware(
       })
     }
 
-    const token = getSessionToken(request)
-    if (!token) {
+    const auth = await getAuthenticatedUser(request)
+    if (!auth) {
       return errorResponse('Not authenticated', 401, {
         requestId: context.requestId
       })
     }
 
     if (action === 'signout') {
-      // In production: Invalidate JWT token in Redis/database
-      SESSION_STORE.delete(token)
+      revokeSession(auth.session.sessionId, auth.session.exp)
 
       return clearSessionCookie(successResponse(
         {
@@ -634,12 +594,7 @@ export const DELETE = withMiddleware(
     }
 
     if (action === 'delete_account') {
-      const user = getUserByToken(token)
-      if (!user) {
-        return errorResponse('Not authenticated', 401, {
-          requestId: context.requestId
-        })
-      }
+      const { user } = auth
 
       const userIndex = MOCK_USERS.findIndex(existingUser => existingUser.id === user.id)
 
@@ -660,7 +615,7 @@ export const DELETE = withMiddleware(
 
       MOCK_USERS.splice(userIndex, 1)
       PASSWORD_STORE.delete(user.email)
-      SESSION_STORE.delete(token)
+      revokeSession(auth.session.sessionId, auth.session.exp)
 
       return clearSessionCookie(new NextResponse(null, { status: 204 }))
     }

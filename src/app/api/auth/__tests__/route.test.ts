@@ -4,19 +4,15 @@
 import { NextRequest } from 'next/server'
 import { POST, GET, PUT, DELETE } from '../route'
 
-// Mock crypto.randomBytes
-jest.mock('crypto', () => ({
-  randomBytes: jest.fn(() => ({
-    toString: () => 'mock-secure-token-32-bytes-hex-string',
-  })),
-}))
+const TEST_DEMO_PASSWORD = 'FearvanaDemo123!'
 
 // Helper to create NextRequest
 function createRequest(
   method: string,
   body?: object,
   cookies?: Record<string, string>,
-  searchParams?: Record<string, string>
+  searchParams?: Record<string, string>,
+  headers?: Record<string, string>
 ): NextRequest {
   const url = new URL('http://localhost:3000/api/auth')
 
@@ -34,15 +30,41 @@ function createRequest(
       ...(cookies?.fearvana_session
         ? { cookie: `fearvana_session=${cookies.fearvana_session}` }
         : {}),
+      ...headers
     },
   })
 
   return request
 }
 
+function extractSessionCookie(response: Response): string {
+  const setCookie = response.headers.get('set-cookie')
+  const sessionCookie = setCookie?.split(';')[0]
+
+  if (!sessionCookie) {
+    throw new Error('Session cookie was not set')
+  }
+
+  return sessionCookie
+}
+
+async function signInAndGetSessionCookie(): Promise<string> {
+  const response = await POST(createRequest('POST', {
+    action: 'signin',
+    email: 'demo@fearvana.ai',
+    password: TEST_DEMO_PASSWORD
+  }))
+
+  expect(response.status).toBe(200)
+  return extractSessionCookie(response)
+}
+
 describe('Auth API Route', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    process.env.JWT_SECRET = 'test-jwt-secret-1234567890abcdefghijklmnop'
+    process.env.JWT_ISSUER = 'fearvana-ai-tests'
+    process.env.JWT_AUDIENCE = 'fearvana-ai-users-tests'
   })
 
   describe('POST /api/auth - Signup', () => {
@@ -64,6 +86,10 @@ describe('Auth API Route', () => {
       expect(data.user.email).toBe('newuser@test.com')
       expect(data.user.name).toBe('Test User')
       expect(data.isNewUser).toBe(true)
+      expect(data.session).toEqual({
+        expiresAt: expect.any(String),
+      })
+      expect(data.session.token).toBeUndefined()
 
       // Check that cookie is set
       const setCookie = response.headers.get('set-cookie')
@@ -147,7 +173,7 @@ describe('Auth API Route', () => {
       const request = createRequest('POST', {
         action: 'signin',
         email: 'demo@fearvana.ai',
-        password: 'anypassword',
+        password: TEST_DEMO_PASSWORD,
       })
 
       const response = await POST(request)
@@ -158,6 +184,10 @@ describe('Auth API Route', () => {
       expect(data.user).toBeDefined()
       expect(data.user.email).toBe('demo@fearvana.ai')
       expect(data.isNewUser).toBe(false)
+      expect(data.session).toEqual({
+        expiresAt: expect.any(String),
+      })
+      expect(data.session.token).toBeUndefined()
 
       // Check that cookie is set
       const setCookie = response.headers.get('set-cookie')
@@ -209,15 +239,16 @@ describe('Auth API Route', () => {
       const signinRequest = createRequest('POST', {
         action: 'signin',
         email: 'demo@fearvana.ai',
-        password: 'password',
+        password: TEST_DEMO_PASSWORD,
       })
-      await POST(signinRequest)
+      const signinResponse = await POST(signinRequest)
+      const sessionCookie = extractSessionCookie(signinResponse)
 
       // Now try to get session with cookie
       const request = new NextRequest('http://localhost:3000/api/auth', {
         method: 'GET',
         headers: {
-          cookie: 'fearvana_session=mock-token',
+          cookie: sessionCookie,
         },
       })
 
@@ -245,13 +276,7 @@ describe('Auth API Route', () => {
     })
 
     it('should update profile with valid cookie', async () => {
-      // First sign in
-      const signinRequest = createRequest('POST', {
-        action: 'signin',
-        email: 'demo@fearvana.ai',
-        password: 'password',
-      })
-      await POST(signinRequest)
+      const sessionCookie = await signInAndGetSessionCookie()
 
       // Update profile with cookie
       const request = new NextRequest('http://localhost:3000/api/auth', {
@@ -263,7 +288,7 @@ describe('Auth API Route', () => {
         }),
         headers: {
           'Content-Type': 'application/json',
-          cookie: 'fearvana_session=mock-token',
+          cookie: sessionCookie,
         },
       })
 
@@ -276,13 +301,7 @@ describe('Auth API Route', () => {
     })
 
     it('should update sacred edge discovery', async () => {
-      // First sign in
-      const signinRequest = createRequest('POST', {
-        action: 'signin',
-        email: 'demo@fearvana.ai',
-        password: 'password',
-      })
-      await POST(signinRequest)
+      const sessionCookie = await signInAndGetSessionCookie()
 
       const request = new NextRequest('http://localhost:3000/api/auth', {
         method: 'PUT',
@@ -293,7 +312,7 @@ describe('Auth API Route', () => {
         }),
         headers: {
           'Content-Type': 'application/json',
-          cookie: 'fearvana_session=mock-token',
+          cookie: sessionCookie,
         },
       })
 
@@ -337,11 +356,12 @@ describe('Auth API Route', () => {
     })
 
     it('should sign out and clear cookie', async () => {
+      const sessionCookie = await signInAndGetSessionCookie()
       const url = new URL('http://localhost:3000/api/auth?action=signout')
       const request = new NextRequest(url, {
         method: 'DELETE',
         headers: {
-          cookie: 'fearvana_session=mock-token',
+          cookie: sessionCookie,
         },
       })
 

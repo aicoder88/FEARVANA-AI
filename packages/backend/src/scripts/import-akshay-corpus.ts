@@ -1,7 +1,9 @@
 import 'openai/shims/node'
+/* eslint-disable @typescript-eslint/no-var-requires */
 
 import fs from 'fs/promises'
 import path from 'path'
+import { createHash } from 'crypto'
 
 import OpenAI from 'openai'
 import { createClient } from '@supabase/supabase-js'
@@ -44,6 +46,14 @@ interface ImportSummary {
 }
 
 const SUPPORTED_EXTENSIONS = new Set(['.json', '.md', '.txt'])
+
+interface ExistingMemoryRecord {
+  id: string
+  memory_type: string
+  title: string
+  canonical_phrase: string | null
+  metadata: JsonRecord | null
+}
 
 async function main() {
   const options = parseImportOptions(process.argv.slice(2))
@@ -410,7 +420,7 @@ async function insertChunks(
 
   const { data, error } = await supabase
     .from('akshay_document_chunks')
-    .insert(rows)
+    .upsert(rows, { onConflict: 'document_id,chunk_index' })
     .select('id, chunk_index')
 
   if (error) {
@@ -420,7 +430,7 @@ async function insertChunks(
   return ((data as Array<{ id: string; chunk_index: number }> | null) || [])
 }
 
-async function insertMemoryRecords(
+export async function insertMemoryRecords(
   supabase: SupabaseAdminClient,
   documentId: string,
   memoryRecords: Array<{
@@ -442,6 +452,12 @@ async function insertMemoryRecords(
   }
 
   const chunkIdByIndex = new Map(insertedChunks.map((chunk) => [chunk.chunk_index, chunk.id]))
+  const existingRecords = await loadExistingMemoryRecords(supabase, documentId)
+  const existingRecordIdByImportKey = new Map(
+    existingRecords
+      .map((record) => [getExistingMemoryImportKey(record), record.id] as const)
+      .filter((entry): entry is [string, string] => Boolean(entry[0]))
+  )
 
   const rows = memoryRecords.map((record) => {
     const maybeChunkIndex = typeof record.metadata.chunkIndex === 'number'
@@ -453,7 +469,10 @@ async function insertMemoryRecords(
         ? 'approved'
         : record.status
 
+    const importKey = buildMemoryImportKey(record)
+
     return {
+      id: existingRecordIdByImportKey.get(importKey),
       document_id: documentId,
       chunk_id: maybeChunkIndex !== null ? chunkIdByIndex.get(maybeChunkIndex) || null : null,
       memory_type: record.memory_type,
@@ -464,19 +483,85 @@ async function insertMemoryRecords(
       tags: record.tags,
       importance: record.importance,
       status: derivedStatus,
-      metadata: record.metadata,
+      metadata: {
+        ...record.metadata,
+        importKey,
+      },
     }
   })
 
-  const { error } = await supabase
-    .from('akshay_memory_records')
-    .insert(rows)
+  const rowsToUpdate = rows.filter((row) => typeof row.id === 'string')
+  const rowsToInsert = rows.filter((row) => !row.id).map(({ id, ...row }) => row)
 
-  if (error) {
-    throw new Error(`Failed to insert Akshay memory records: ${error.message}`)
+  for (const row of rowsToUpdate) {
+    const { id, ...update } = row
+    const { error } = await supabase
+      .from('akshay_memory_records')
+      .update(update)
+      .eq('id', id)
+
+    if (error) {
+      throw new Error(`Failed to update Akshay memory record ${id}: ${error.message}`)
+    }
+  }
+
+  if (rowsToInsert.length > 0) {
+    const { error } = await supabase
+      .from('akshay_memory_records')
+      .insert(rowsToInsert)
+
+    if (error) {
+      throw new Error(`Failed to insert Akshay memory records: ${error.message}`)
+    }
   }
 
   return rows.length
+}
+
+async function loadExistingMemoryRecords(
+  supabase: SupabaseAdminClient,
+  documentId: string
+): Promise<ExistingMemoryRecord[]> {
+  const { data, error } = await supabase
+    .from('akshay_memory_records')
+    .select('id, memory_type, title, canonical_phrase, metadata')
+    .eq('document_id', documentId)
+
+  if (error) {
+    throw new Error(`Failed to load existing Akshay memory records: ${error.message}`)
+  }
+
+  return (data as ExistingMemoryRecord[] | null) || []
+}
+
+export function buildMemoryImportKey(record: {
+  memory_type: string
+  title: string
+  canonical_phrase: string | null
+  metadata: JsonRecord
+}): string {
+  const keySeed = JSON.stringify({
+    origin: record.metadata.origin || 'unknown',
+    sourceSlug: record.metadata.sourceSlug || null,
+    chunkIndex: typeof record.metadata.chunkIndex === 'number' ? record.metadata.chunkIndex : null,
+    memoryType: record.memory_type,
+    title: record.title.trim().toLowerCase(),
+    canonicalPhrase: (record.canonical_phrase || '').trim().toLowerCase(),
+  })
+
+  return createHash('sha256').update(keySeed).digest('hex')
+}
+
+function getImportKeyFromMetadata(metadata: JsonRecord | null): string | null {
+  const importKey = metadata?.importKey
+  return typeof importKey === 'string' && importKey.length > 0 ? importKey : null
+}
+
+function getExistingMemoryImportKey(record: ExistingMemoryRecord): string {
+  return getImportKeyFromMetadata(record.metadata) || buildMemoryImportKey({
+    ...record,
+    metadata: record.metadata || {},
+  })
 }
 
 function serializeVector(vector: number[] | undefined): string {
@@ -487,8 +572,16 @@ function serializeVector(vector: number[] | undefined): string {
   return `[${vector.join(',')}]`
 }
 
-void main().catch((error) => {
-  console.error('Akshay corpus import failed')
-  console.error(error)
-  process.exitCode = 1
-})
+const isDirectExecution =
+  typeof require !== 'undefined' &&
+  typeof module !== 'undefined' &&
+  Boolean(process.argv[1]) &&
+  path.resolve(process.argv[1]) === __filename
+
+if (isDirectExecution) {
+  void main().catch((error) => {
+    console.error('Akshay corpus import failed')
+    console.error(error)
+    process.exitCode = 1
+  })
+}

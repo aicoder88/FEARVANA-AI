@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+import {
+  getMiddlewareAuthenticatedUserId,
+  middlewareAuthenticationRequiredResponse,
+} from '@/lib/api/request-auth'
 
 // Mock Stripe integration - in production use actual Stripe SDK
 export type PaymentMethod = {
@@ -65,18 +69,22 @@ const MOCK_PAYMENT_METHODS: PaymentMethod[] = [
 // POST /api/payments - Create payment intent
 export async function POST(request: NextRequest) {
   try {
+    const authenticatedUserId = getMiddlewareAuthenticatedUserId(request)
+    if (!authenticatedUserId) {
+      return middlewareAuthenticationRequiredResponse()
+    }
+
     const { 
       amount, 
       currency = 'usd', 
       productId, 
       subscriptionType,
-      userId,
       paymentMethodId 
     } = await request.json()
-    
-    if (!amount || !productId || !userId) {
+
+    if (!amount || !productId) {
       return NextResponse.json(
-        { error: 'Amount, productId, and userId are required' },
+        { error: 'Amount and productId are required' },
         { status: 400 }
       )
     }
@@ -98,7 +106,7 @@ export async function POST(request: NextRequest) {
       metadata: {
         productId,
         subscriptionType: subscriptionType || 'monthly',
-        userId
+        userId: authenticatedUserId
       }
     }
     
@@ -118,17 +126,14 @@ export async function POST(request: NextRequest) {
 
 // GET /api/payments - Get payment methods or payment history
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  const userId = searchParams.get('userId')
-  const type = searchParams.get('type') // 'methods' or 'history'
-  
-  if (!userId) {
-    return NextResponse.json(
-      { error: 'User ID is required' },
-      { status: 400 }
-    )
+  const authenticatedUserId = getMiddlewareAuthenticatedUserId(request)
+  if (!authenticatedUserId) {
+    return middlewareAuthenticationRequiredResponse()
   }
-  
+
+  const { searchParams } = new URL(request.url)
+  const type = searchParams.get('type') // 'methods' or 'history'
+
   if (type === 'methods') {
     // Return payment methods for user
     return NextResponse.json({
@@ -173,8 +178,12 @@ export async function GET(request: NextRequest) {
 // PUT /api/payments - Update payment method or confirm payment
 export async function PUT(request: NextRequest) {
   try {
+    if (!getMiddlewareAuthenticatedUserId(request)) {
+      return middlewareAuthenticationRequiredResponse()
+    }
+
     const { action, paymentIntentId, paymentMethodId } = await request.json()
-    
+
     if (action === 'confirm_payment') {
       if (!paymentIntentId) {
         return NextResponse.json(
@@ -224,9 +233,13 @@ export async function PUT(request: NextRequest) {
 
 // DELETE /api/payments - Remove payment method
 export async function DELETE(request: NextRequest) {
+  if (!getMiddlewareAuthenticatedUserId(request)) {
+    return middlewareAuthenticationRequiredResponse()
+  }
+
   const { searchParams } = new URL(request.url)
   const paymentMethodId = searchParams.get('paymentMethodId')
-  
+
   if (!paymentMethodId) {
     return NextResponse.json(
       { error: 'Payment method ID is required' },
