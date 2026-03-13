@@ -67,7 +67,7 @@ Fearvana AI is the digital embodiment of Akshay Nanavati's teachings from [Fearv
 
 ### Prerequisites
 - Node.js 18+
-- npm or pnpm
+- pnpm
 - API keys for AI services
 
 ### Installation
@@ -78,14 +78,14 @@ git clone https://github.com/your-org/fearvana-ai.git
 cd fearvana-ai
 
 # Install dependencies
-npm install
+pnpm install
 
 # Set up environment variables
 cp .env.example .env.local
 # Add your API keys to .env.local
 
 # Run development server
-npm run dev
+pnpm dev
 ```
 
 ### Environment Variables

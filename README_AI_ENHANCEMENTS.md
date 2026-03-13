@@ -40,7 +40,7 @@ This package contains a complete overhaul of the FEARVANA-AI integration archite
 ### 1. Install Dependencies
 
 ```bash
-npm install @anthropic-ai/sdk
+pnpm add @anthropic-ai/sdk
 ```
 
 ### 2. Configure Environment
@@ -54,7 +54,7 @@ OPENAI_API_KEY=your_openai_key_here
 ### 3. Test in Development
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 Navigate to: `http://localhost:3000/api/ai-coach-enhanced`
@@ -226,16 +226,16 @@ See `IMPLEMENTATION_GUIDE.md` for complete integration examples.
 ### Unit Tests
 ```bash
 # Test AI service
-npm test src/lib/ai-service-enhanced.test.ts
+pnpm test src/lib/ai-service-enhanced.test.ts
 
 # Test context management
-npm test src/lib/conversation-context.test.ts
+pnpm test src/lib/conversation-context.test.ts
 ```
 
 ### Integration Tests
 ```bash
 # Test API routes
-npm test src/app/api/ai-coach-enhanced/route.test.ts
+pnpm test src/app/api/ai-coach-enhanced/route.test.ts
 ```
 
 ### Manual Testing Checklist

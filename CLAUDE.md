@@ -7,61 +7,61 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Development Commands
 ```bash
 # Start development server with Turbo
-npm run dev
+pnpm dev
 
 # Build for production
-npm run build
+pnpm build
 
 # Start production server
-npm start
+pnpm start
 
 # Lint code
-npm run lint
+pnpm lint
 
 # Auto-fix linting issues
-npm run lint:fix
+pnpm lint:fix
 
 # Type checking
-npm run type-check
+pnpm type-check
 
 # Format code
-npm run format
+pnpm format
 
 # Check formatting
-npm run format:check
+pnpm format:check
 ```
 
 ### Testing Commands
 ```bash
 # Run tests
-npm test
+pnpm test
 
 # Run tests in watch mode
-npm test:watch
+pnpm test:watch
 
 # Generate test coverage
-npm test:coverage
+pnpm test:coverage
 ```
 
 ### Database Commands
 ```bash
 # Generate Supabase types
-npm run db:generate-types
+pnpm db:generate-types
 
 # Reset database
-npm run db:reset
+pnpm db:reset
 
 # Run migrations
-npm run db:migrate
+pnpm db:migrate
 ```
 
 ### Utility Commands
 ```bash
 # Analyze bundle size
-npm run analyze
+pnpm analyze
 
 # Clean build artifacts
-npm run clean
+pnpm clean
 ```
 
 ## Project Architecture
@@ -192,5 +192,5 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ### Testing & Deployment
 - Jest configured for testing
 - Vercel deployment ready
-- Bundle analysis available with `npm run analyze`
+- Bundle analysis available with `pnpm analyze`
 - TypeScript and ESLint checks (currently ignored in builds)
